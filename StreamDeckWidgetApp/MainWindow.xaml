@@ -5,10 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:StreamDeckWidgetApp.Core.Converters"
         mc:Ignorable="d"
-        Title="Virtual Deck" 
-        Width="{Binding WindowWidth, Mode=OneWay}" 
-        Height="{Binding WindowHeight, Mode=OneWay}"
-        SizeToContent="Manual"
+        Title="Virtual Deck"
+        SizeToContent="WidthAndHeight"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -52,11 +50,12 @@
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <ItemsControl Grid.Column="0" ItemsSource="{Binding DeckItems}">
+                <ItemsControl Grid.Column="0" ItemsSource="{Binding DeckItems}"
+                              HorizontalAlignment="Left" VerticalAlignment="Top">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="{Binding DataContext.Columns, RelativeSource={RelativeSource AncestorType=Window}}"/>
@@ -64,9 +63,11 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Button Command="{Binding DataContext.ItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                    CommandParameter="{Binding}"
-                                    Margin="5" Cursor="Hand" BorderThickness="0">
+                                    <Button Command="{Binding DataContext.ItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}"
+                                        Margin="5" Cursor="Hand" BorderThickness="0"
+                                        Width="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Height="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}">
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Template">
