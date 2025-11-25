@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:viewModels="clr-namespace:StreamDeckWidgetApp.ViewModels"
+        xmlns:converters="clr-namespace:StreamDeckWidgetApp.Core.Converters"
         mc:Ignorable="d"
-        Title="Virtual Deck" Height="200" Width="400"
+        Title="Virtual Deck" Height="300" Width="600"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -13,56 +13,137 @@
         Topmost="True"
         MouseDown="Window_MouseDown">
 
-    <Border Background="#1E1E1E" CornerRadius="15" BorderBrush="#333" BorderThickness="1">
-        <Grid Margin="10">
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+
+    <Border Background="#1E1E1E" CornerRadius="15" BorderBrush="#444" BorderThickness="1">
+        <Grid Margin="15">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Button Command="{Binding CloseAppCommand}" 
-                    Content="X" 
-                    HorizontalAlignment="Right" 
-                    Width="20" Height="20"
-                    Background="Transparent" Foreground="#AAA" BorderThickness="0"
-                    Cursor="Hand"/>
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <TextBlock Text="Stream Deck" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                </StackPanel>
 
-            <ItemsControl Grid.Row="1" ItemsSource="{Binding DeckItems}" Margin="0,10,0,0">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="3"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button Command="{Binding DataContext.ItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="{Binding}"
-                                Margin="5"
-                                Cursor="Hand" BorderThickness="0">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{Binding Color}" CornerRadius="8" Padding="10">
-                                                    <TextBlock Text="{Binding Title}" 
-                                                               Foreground="White" 
-                                                               FontWeight="Bold"
-                                                               HorizontalAlignment="Center" 
-                                                               VerticalAlignment="Center"
-                                                               TextWrapping="Wrap"
-                                                               TextAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Command="{Binding ToggleEditModeCommand}" Content="Edit" Width="50" Height="25" Margin="0,0,5,0"
+                            Background="#333" Foreground="White" BorderThickness="0" Cursor="Hand">
+                        <Button.Resources>
+                            <Style TargetType="Border"><Setter Property="CornerRadius" Value="5"/></Style>
+                        </Button.Resources>
+                    </Button>
+                    
+                    <Button Command="{Binding CloseAppCommand}" Content="X" Width="30" Height="25"
+                            Background="#C62828" Foreground="White" BorderThickness="0" Cursor="Hand">
+                        <Button.Resources>
+                            <Style TargetType="Border"><Setter Property="CornerRadius" Value="5"/></Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ItemsControl Grid.Column="0" ItemsSource="{Binding DeckItems}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="3"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding DataContext.ItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"
+                                    Margin="5" Cursor="Hand" BorderThickness="0">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{Binding Color}" CornerRadius="8" Padding="5">
+                                                        <TextBlock Text="{Binding Title}" Foreground="White" FontWeight="Bold"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   TextWrapping="Wrap" TextAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Border Grid.Column="1" Width="200" Margin="10,0,0,0" Padding="10"
+                        Background="#252525" CornerRadius="10" BorderBrush="#444" BorderThickness="1"
+                        Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVis}}">
+                    
+                    <StackPanel>
+                        <TextBlock Text="BUTON AYARLARI" Foreground="Gray" FontSize="11" Margin="0,0,0,10" FontWeight="Bold"/>
+
+                        <TextBlock Text="Bir butona tiklayin..." Foreground="#777" 
+                                   HorizontalAlignment="Center" Margin="0,20,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedDeckItem}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
-                            </Button.Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <StackPanel DataContext="{Binding SelectedDeckItem}">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            
+                            <TextBlock Text="Baslik:" Foreground="White" Margin="0,5,0,0"/>
+                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Padding="3"/>
+
+                            <TextBlock Text="Renk (Hex):" Foreground="White" Margin="0,10,0,0"/>
+                            <TextBox Text="{Binding Color, UpdateSourceTrigger=PropertyChanged}" Padding="3"/>
+                            <Border Height="5" Background="{Binding Color}" Margin="0,2,0,0" CornerRadius="2"/>
+
+                            <TextBlock Text="Aksiyon Tipi:" Foreground="White" Margin="0,10,0,0"/>
+                            <ComboBox ItemsSource="{Binding DataContext.ActionTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                      SelectedItem="{Binding ActionType}" Margin="0,2,0,0"/>
+
+                            <TextBlock Text="Komut / URL:" Foreground="White" Margin="0,10,0,0"/>
+                            <TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" Padding="3" Height="60" TextWrapping="Wrap"/>
+                            <TextBlock Text="(Orn: notepad.exe, COPY, https://...)" Foreground="Gray" FontSize="10"/>
+
+                        </StackPanel>
+
+                        <Button Command="{Binding SaveCommand}" Content="KAYDET" 
+                                Background="#4CAF50" Foreground="White" BorderThickness="0"
+                                Margin="0,20,0,0" Height="30" Cursor="Hand">
+                             <Button.Resources>
+                                <Style TargetType="Border"><Setter Property="CornerRadius" Value="5"/></Style>
+                            </Button.Resources>
                         </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+            </Grid>
         </Grid>
     </Border>
 </Window>
