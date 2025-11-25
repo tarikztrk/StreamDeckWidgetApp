@@ -104,4 +104,40 @@ public class MainViewModel : ObservableObject
             IsEditMode = false; // Kaydettikten sonra moddan çýk
         }
     }
+
+    public void HandleFileDrop(DeckItem targetItem, string filePath)
+    {
+        // Dosya uzantýsýný al
+        string ext = System.IO.Path.GetExtension(filePath).ToLower();
+        string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+
+        // 1. Eðer resim dosyasýysa (Ýleride Ýkon desteði için hazýrlýk)
+        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".ico")
+        {
+            // Þimdilik sadece konsept olarak buradayýz, henüz IconPath property'miz UI'da yok.
+            // targetItem.IconPath = filePath; 
+            MessageBox.Show("Resim desteði bir sonraki adýmda eklenecek!", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+            return; 
+        }
+
+        // 2. Eðer kýsayol (.lnk) veya çalýþtýrýlabilir (.exe) dosya ise
+        if (ext == ".exe" || ext == ".lnk" || ext == ".bat")
+        {
+            // Butonun özelliklerini güncelle
+            targetItem.Title = fileName;       // Dosya adýný baþlýk yap
+            targetItem.Command = filePath;     // Dosya yolunu komut yap
+            targetItem.ActionType = "Execute"; // Tipi otomatik Execute yap
+            
+            // Seçili butonu güncelle (Eðer edit modundaysak sað panel dolsun)
+            if (IsEditMode)
+            {
+                SelectedDeckItem = null; // Önce null yap
+                SelectedDeckItem = targetItem; // Sonra tekrar ata (UI refresh için)
+            }
+            
+            // Otomatik kaydet
+            _currentProfile.Items = DeckItems.ToList();
+            _configService.SaveProfile(_currentProfile);
+        }
+    }
 }

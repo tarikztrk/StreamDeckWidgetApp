@@ -68,7 +68,11 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="Button">
-                                                    <Border Background="{Binding Color}" CornerRadius="8" Padding="5">
+                                                    <Border Background="{Binding Color}" 
+                                                            CornerRadius="8" 
+                                                            Padding="5"
+                                                            AllowDrop="True"
+                                                            Drop="Button_Drop">
                                                         <TextBlock Text="{Binding Title}" Foreground="White" FontWeight="Bold"
                                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                    TextWrapping="Wrap" TextAlignment="Center"/>
