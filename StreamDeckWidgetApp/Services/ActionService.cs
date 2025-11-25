@@ -1,30 +1,32 @@
-using System.Diagnostics;
 using StreamDeckWidgetApp.Abstractions;
+using StreamDeckWidgetApp.Core.Actions;
 using StreamDeckWidgetApp.Models;
 
 namespace StreamDeckWidgetApp.Services;
 
 public class ActionService : IActionService
 {
+    private readonly ActionFactory _actionFactory;
+
+    public ActionService()
+    {
+        _actionFactory = new ActionFactory();
+    }
+
     public void ExecuteItem(DeckItem item)
     {
-        // Ýleride buraya Switch-Case veya Strategy Pattern ile farklý aksiyon tipleri eklenebilir.
-        // Þimdilik sadece "Process.Start" mantýðý kuralým.
-        
-        if (string.IsNullOrWhiteSpace(item.Command)) return;
+        // 1. Fabrikadan bu ActionType'ý (örn: "Website") bilen iþçiyi al
+        var runner = _actionFactory.GetRunner(item.ActionType);
 
-        try
+        // 2. Ýþçi varsa çalýþtýr
+        if (runner != null)
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = item.Command,
-                UseShellExecute = true
-            });
+            runner.Execute(item);
         }
-        catch (Exception ex)
+        else
         {
-            // Ýleride buraya bir Logger servisi enjekte edip loglayacaðýz.
-            Debug.WriteLine($"Hata: {ex.Message}");
+            // Tanýmsýz aksiyon tipi (Loglanabilir)
+            System.Diagnostics.Debug.WriteLine($"Tanýnmayan ActionType: {item.ActionType}");
         }
     }
 }
