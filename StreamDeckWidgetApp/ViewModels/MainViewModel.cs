@@ -24,8 +24,9 @@ public class MainViewModel : ObservableObject
         {
             if (SetField(ref _isEditMode, value))
             {
-                // Mod deðiþince seçimi sýfýrla
+                // Mod deÄŸiÅŸince seÃ§imi sÄ±fÄ±rla
                 if (!value) SelectedDeckItem = null;
+                UpdateWindowSize(); // Panel aÃ§Ä±lÄ±nca pencere bÃ¼yÃ¼sÃ¼n
             }
         }
     }
@@ -37,7 +38,7 @@ public class MainViewModel : ObservableObject
         set => SetField(ref _selectedDeckItem, value);
     }
     
-    // Grid Boyutlarý - Dinamik Olarak Deðiþtirilebilir
+    // Grid BoyutlarÄ± - Dinamik Olarak DeÄŸiÅŸtirilebilir
     public int Rows
     {
         get => _currentProfile.Rows;
@@ -48,6 +49,7 @@ public class MainViewModel : ObservableObject
                 _currentProfile.Rows = value;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
+                UpdateWindowSize(); // Boyut deÄŸiÅŸince pencereyi gÃ¼ncelle
             }
         }
     }
@@ -62,11 +64,50 @@ public class MainViewModel : ObservableObject
                 _currentProfile.Columns = value;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
+                UpdateWindowSize(); // Boyut deÄŸiÅŸince pencereyi gÃ¼ncelle
             }
         }
     }
     
-    // ComboBox için Action Tipleri
+    // SeÃ§enekler (Display Name -> Pixel Size)
+    public Dictionary<string, int> ButtonSizeOptions { get; } = new()
+    {
+        { "KÃ¼Ã§Ã¼k (32px)", 45 }, // 32px buton + boÅŸluk payÄ±
+        { "Orta (48px)", 65 },  // 48px buton + boÅŸluk payÄ±
+        { "BÃ¼yÃ¼k (64px)", 85 }  // 64px buton + boÅŸluk payÄ±
+    };
+
+    // Aktif Buton Boyutu
+    public int SelectedButtonSize
+    {
+        get => _currentProfile.ButtonSize;
+        set
+        {
+            if (_currentProfile.ButtonSize != value)
+            {
+                _currentProfile.ButtonSize = value;
+                OnPropertyChanged();
+                UpdateWindowSize(); // Boyut deÄŸiÅŸince pencereyi gÃ¼ncelle
+            }
+        }
+    }
+
+    // Pencere Boyut Ã–zellikleri
+    private double _windowWidth;
+    public double WindowWidth
+    {
+        get => _windowWidth;
+        set => SetField(ref _windowWidth, value);
+    }
+
+    private double _windowHeight;
+    public double WindowHeight
+    {
+        get => _windowHeight;
+        set => SetField(ref _windowHeight, value);
+    }
+    
+    // ComboBox iÃ§in Action Tipleri
     public List<string> ActionTypes { get; } = new() { "Execute", "Hotkey", "Website" };
 
     public ObservableCollection<DeckItem> DeckItems { get; set; }
@@ -92,10 +133,10 @@ public class MainViewModel : ObservableObject
             Application.Current.Shutdown();
         });
         
-        // Edit Modunu Aç/Kapat
+        // Edit Modunu Aï¿½/Kapat
         ToggleEditModeCommand = new RelayCommand(_ => IsEditMode = !IsEditMode);
         
-        // Deðiþiklikleri Kaydet
+        // Deï¿½iï¿½iklikleri Kaydet
         SaveCommand = new RelayCommand(_ => SaveChanges());
     }
 
@@ -103,26 +144,30 @@ public class MainViewModel : ObservableObject
     {
         _currentProfile = _configService.LoadProfile();
         
-        // Veri yüklendikten sonra Grid'i olmasý gereken sayýya tamamla
+        // EÄŸer eski profillerde boyut yoksa varsayÄ±lanÄ± ata
+        if (_currentProfile.ButtonSize == 0) _currentProfile.ButtonSize = 85;
+        
+        // Veri yÃ¼klendikten sonra Grid'i olmasÄ± gereken sayÄ±ya tamamla
         RefreshGrid();
+        UpdateWindowSize(); // Ä°lk yÃ¼klemede boyutu hesapla
     }
 
-    // Buton listesini yeni boyutlara göre ayarlar
+    // Buton listesini yeni boyutlara gï¿½re ayarlar
     private void RefreshGrid()
     {
         int totalSlots = Rows * Columns;
         
-        // Mevcut verileri koru ama görünümü yeni boyuta ayarla
+        // Mevcut verileri koru ama gï¿½rï¿½nï¿½mï¿½ yeni boyuta ayarla
         DeckItems.Clear();
         
         for (int i = 0; i < totalSlots; i++)
         {
-            // Eðer kayýtlý veri yetmiyorsa yeni boþ buton oluþtur
+            // Eï¿½er kayï¿½tlï¿½ veri yetmiyorsa yeni boï¿½ buton oluï¿½tur
             if (i >= _currentProfile.Items.Count)
             {
                 _currentProfile.Items.Add(new DeckItem 
                 { 
-                    Title = "Boþ", 
+                    Title = "Boï¿½", 
                     Color = "#222222",
                     Row = i / Columns,
                     Column = i % Columns
@@ -132,18 +177,36 @@ public class MainViewModel : ObservableObject
         }
     }
 
+    // Pencere boyutunu hesapla
+    private void UpdateWindowSize()
+    {
+        // Temel hesaplama: (HÃ¼cre SayÄ±sÄ± * HÃ¼cre Boyutu) + Kenar PaylarÄ±
+        double baseWidth = (Columns * SelectedButtonSize) + 30; // 30px kenar payÄ±
+        double baseHeight = (Rows * SelectedButtonSize) + 50;   // 50px header + kenar payÄ±
+
+        // EÄŸer Edit Modu aÃ§Ä±ksa, saÄŸdaki panel iÃ§in ekstra yer aÃ§ (Ã¶rn: 220px)
+        if (IsEditMode)
+        {
+            baseWidth += 220; 
+        }
+
+        // Minimum boyut kontrolÃ¼ (Pencere Ã§ok kÃ¼Ã§Ã¼lÃ¼p yok olmasÄ±n)
+        WindowWidth = Math.Max(baseWidth, 200);
+        WindowHeight = Math.Max(baseHeight, 150);
+    }
+
     private void OnItemClick(object? parameter)
     {
         if (parameter is DeckItem item)
         {
             if (IsEditMode)
             {
-                // Düzenleme modundaysak: Seç
+                // Dï¿½zenleme modundaysak: Seï¿½
                 SelectedDeckItem = item; 
             }
             else
             {
-                // Normal moddaysak: Çalýþtýr
+                // Normal moddaysak: ï¿½alï¿½ï¿½tï¿½r
                 _actionService.ExecuteItem(item);
             }
         }
@@ -157,7 +220,7 @@ public class MainViewModel : ObservableObject
         if (IsEditMode)
         {
             MessageBox.Show("Ayarlar Kaydedildi!", "Stream Deck", MessageBoxButton.OK, MessageBoxImage.Information);
-            IsEditMode = false; // Kaydettikten sonra moddan çýk
+            IsEditMode = false; // Kaydettikten sonra moddan ï¿½ï¿½k
         }
     }
 
@@ -166,34 +229,34 @@ public class MainViewModel : ObservableObject
         string ext = System.IO.Path.GetExtension(filePath).ToLower();
         string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
 
-        // 1. Eðer resim dosasýysa
+        // 1. Eï¿½er resim dosasï¿½ysa
         if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".ico")
         {
             targetItem.IconPath = filePath;
-            targetItem.Title = ""; // Ýsteðe baðlý: Resim atýnca yazýyý silebilirsiniz
+            targetItem.Title = ""; // ï¿½steï¿½e baï¿½lï¿½: Resim atï¿½nca yazï¿½yï¿½ silebilirsiniz
             if (IsEditMode) SelectedDeckItem = targetItem;
             return; 
         }
 
-        // 2. Eðer EXE veya Kýsayol ise (GÜNCELLENDÝ)
+        // 2. Eï¿½er EXE veya Kï¿½sayol ise (Gï¿½NCELLENDï¿½)
         if (ext == ".exe" || ext == ".lnk" || ext == ".bat")
         {
             targetItem.Title = fileName;
             targetItem.Command = filePath;
             targetItem.ActionType = "Execute";
 
-            // --- ÝKON ÇIKARMA ÝÞLEMÝ ---
+            // --- ï¿½KON ï¿½IKARMA ï¿½ï¿½LEMï¿½ ---
             
-            // Ýkonlarýn kaydedileceði klasör: %AppData%/StreamDeckWidgetApp/CachedIcons
+            // ï¿½konlarï¿½n kaydedileceï¿½i klasï¿½r: %AppData%/StreamDeckWidgetApp/CachedIcons
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string iconsFolder = System.IO.Path.Combine(appData, "StreamDeckWidgetApp", "CachedIcons");
 
-            // Helper sýnýfýný çaðýr
+            // Helper sï¿½nï¿½fï¿½nï¿½ ï¿½aï¿½ï¿½r
             string? newIconPath = IconHelper.ExtractAndSaveIcon(filePath, iconsFolder);
 
             if (!string.IsNullOrEmpty(newIconPath))
             {
-                targetItem.IconPath = newIconPath; // Butonun resmi artýk EXE'nin ikonu!
+                targetItem.IconPath = newIconPath; // Butonun resmi artï¿½k EXE'nin ikonu!
             }
             
             // ---------------------------

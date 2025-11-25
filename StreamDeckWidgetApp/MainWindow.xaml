@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:StreamDeckWidgetApp.Core.Converters"
         mc:Ignorable="d"
-        Title="Virtual Deck" Height="300" Width="600"
+        Title="Virtual Deck" 
+        Width="{Binding WindowWidth, Mode=OneWay}" 
+        Height="{Binding WindowHeight, Mode=OneWay}"
+        SizeToContent="Manual"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -122,7 +125,14 @@
                             </StackPanel>
                         </Grid>
 
-                        <Separator Background="#444" Margin="0,0,0,10"/>
+                        <TextBlock Text="Buton Boyutu" Foreground="White" FontSize="10" Margin="0,10,0,0"/>
+                        <ComboBox ItemsSource="{Binding ButtonSizeOptions}" 
+                                  SelectedValue="{Binding SelectedButtonSize}" 
+                                  SelectedValuePath="Value" 
+                                  DisplayMemberPath="Key"
+                                  Margin="0,2,0,0" Height="25"/>
+
+                        <Separator Background="#444" Margin="0,10,0,10"/>
 
                         <TextBlock Text="BUTON AYARLARI" Foreground="Gray" FontSize="11" Margin="0,0,0,10" FontWeight="Bold"/>
 
