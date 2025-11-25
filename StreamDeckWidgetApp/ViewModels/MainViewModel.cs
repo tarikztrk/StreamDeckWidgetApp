@@ -10,6 +10,9 @@ namespace StreamDeckWidgetApp.ViewModels;
 public class MainViewModel : ObservableObject
 {
     private readonly IActionService _actionService;
+    private readonly IConfigService _configService;
+    
+    private Profile _currentProfile;
 
     // ObservableCollection: Listeye eleman eklenince UI otomatik güncellenir.
     public ObservableCollection<DeckItem> DeckItems { get; set; }
@@ -17,16 +20,42 @@ public class MainViewModel : ObservableObject
     public ICommand ItemClickCommand { get; }
     public ICommand CloseAppCommand { get; }
 
-    // Constructor Injection: Servisi dýþarýdan alýyoruz (Test edilebilirlik için önemli)
-    public MainViewModel(IActionService actionService)
+    // Constructor Injection: Servisleri dýþarýdan alýyoruz
+    public MainViewModel(IActionService actionService, IConfigService configService)
     {
         _actionService = actionService;
-        
+        _configService = configService;
+
         DeckItems = new ObservableCollection<DeckItem>();
-        LoadDummyData(); // Þimdilik test verisi yüklüyoruz
+        
+        // Verileri JSON'dan Yükle
+        LoadData();
 
         ItemClickCommand = new RelayCommand(OnItemClick);
-        CloseAppCommand = new RelayCommand(_ => Application.Current.Shutdown());
+        CloseAppCommand = new RelayCommand(_ => 
+        {
+            // Kapanmadan önce profili kaydet
+            SaveData();
+            Application.Current.Shutdown();
+        });
+    }
+
+    private void LoadData()
+    {
+        _currentProfile = _configService.LoadProfile();
+        
+        DeckItems.Clear();
+        foreach (var item in _currentProfile.Items)
+        {
+            DeckItems.Add(item);
+        }
+    }
+
+    private void SaveData()
+    {
+        // Observable collection'daki güncel veriyi profile'a aktar
+        _currentProfile.Items = DeckItems.ToList();
+        _configService.SaveProfile(_currentProfile);
     }
 
     private void OnItemClick(object? parameter)
@@ -36,12 +65,19 @@ public class MainViewModel : ObservableObject
             _actionService.ExecuteItem(item);
         }
     }
-
-    private void LoadDummyData()
+    
+    // Test Amaçlý: Yeni buton ekleyip kaydetmeyi denemek için
+    public void AddNewItem()
     {
-        DeckItems.Add(new DeckItem { Title = "Hesap Mak.", Command = "calc.exe", Color = "#4CAF50" });
-        DeckItems.Add(new DeckItem { Title = "Notepad", Command = "notepad.exe", Color = "#2196F3" });
-        DeckItems.Add(new DeckItem { Title = "Google", Command = "https://google.com", Color = "#FF9800" });
-        DeckItems.Add(new DeckItem { Title = "CMD", Command = "cmd.exe", Color = "#607D8B" });
+        var newItem = new DeckItem 
+        { 
+            Title = "Yeni Buton", 
+            Color = "#9C27B0",
+            Command = "notepad.exe",
+            Row = 1,
+            Column = 0
+        };
+        DeckItems.Add(newItem);
+        SaveData();
     }
 }

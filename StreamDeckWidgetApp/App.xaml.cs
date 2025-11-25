@@ -22,6 +22,7 @@ public partial class App : Application
 
         // Servisleri Kayýt Et
         services.AddSingleton<IActionService, ActionService>();
+        services.AddSingleton<IConfigService, JsonConfigService>(); // JSON Konfigürasyon Servisi
 
         // ViewModel'leri Kayýt Et
         services.AddTransient<MainViewModel>();
