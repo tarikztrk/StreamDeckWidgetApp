@@ -15,6 +15,7 @@
 
     <Window.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:ImagePathToImageSourceConverter x:Key="PathToImage"/>
     </Window.Resources>
 
     <Border Background="#1E1E1E" CornerRadius="15" BorderBrush="#444" BorderThickness="1">
@@ -55,7 +56,7 @@
                 <ItemsControl Grid.Column="0" ItemsSource="{Binding DeckItems}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <UniformGrid Columns="3"/>
+                            <UniformGrid Columns="{Binding DataContext.Columns, RelativeSource={RelativeSource AncestorType=Window}}"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
@@ -73,9 +74,19 @@
                                                             Padding="5"
                                                             AllowDrop="True"
                                                             Drop="Button_Drop">
-                                                        <TextBlock Text="{Binding Title}" Foreground="White" FontWeight="Bold"
-                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                   TextWrapping="Wrap" TextAlignment="Center"/>
+                                                        <Grid>
+                                                            <Image Source="{Binding IconPath, Converter={StaticResource PathToImage}}" 
+                                                                   Stretch="UniformToFill"
+                                                                   Opacity="0.8"/>
+                                                            
+                                                            <TextBlock Text="{Binding Title}" 
+                                                                       Foreground="White" 
+                                                                       FontWeight="Bold"
+                                                                       HorizontalAlignment="Center" 
+                                                                       VerticalAlignment="Center"
+                                                                       TextWrapping="Wrap" 
+                                                                       TextAlignment="Center"/>
+                                                        </Grid>
                                                     </Border>
                                                 </ControlTemplate>
                                             </Setter.Value>
@@ -92,6 +103,27 @@
                         Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVis}}">
                     
                     <StackPanel>
+                        <TextBlock Text="GRID AYARLARI" Foreground="Gray" FontSize="11" Margin="0,0,0,5" FontWeight="Bold"/>
+
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                <TextBlock Text="Satir" Foreground="White" FontSize="10"/>
+                                <TextBox Text="{Binding Rows, UpdateSourceTrigger=PropertyChanged}" Padding="2" TextAlignment="Center"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                <TextBlock Text="Sutun" Foreground="White" FontSize="10"/>
+                                <TextBox Text="{Binding Columns, UpdateSourceTrigger=PropertyChanged}" Padding="2" TextAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Separator Background="#444" Margin="0,0,0,10"/>
+
                         <TextBlock Text="BUTON AYARLARI" Foreground="Gray" FontSize="11" Margin="0,0,0,10" FontWeight="Bold"/>
 
                         <TextBlock Text="Bir butona tiklayin..." Foreground="#777" 

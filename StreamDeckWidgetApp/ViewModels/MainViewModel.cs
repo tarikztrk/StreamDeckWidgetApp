@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using StreamDeckWidgetApp.Abstractions;
 using StreamDeckWidgetApp.Core;
+using StreamDeckWidgetApp.Core.Helpers;
 using StreamDeckWidgetApp.Models;
 
 namespace StreamDeckWidgetApp.ViewModels;
@@ -34,6 +35,35 @@ public class MainViewModel : ObservableObject
     {
         get => _selectedDeckItem;
         set => SetField(ref _selectedDeckItem, value);
+    }
+    
+    // Grid Boyutlarý - Dinamik Olarak Deðiþtirilebilir
+    public int Rows
+    {
+        get => _currentProfile.Rows;
+        set
+        {
+            if (_currentProfile.Rows != value && value > 0)
+            {
+                _currentProfile.Rows = value;
+                OnPropertyChanged();
+                RefreshGrid(); // Grid boyutunu yeniden hesapla
+            }
+        }
+    }
+
+    public int Columns
+    {
+        get => _currentProfile.Columns;
+        set
+        {
+            if (_currentProfile.Columns != value && value > 0)
+            {
+                _currentProfile.Columns = value;
+                OnPropertyChanged();
+                RefreshGrid(); // Grid boyutunu yeniden hesapla
+            }
+        }
     }
     
     // ComboBox için Action Tipleri
@@ -72,8 +102,34 @@ public class MainViewModel : ObservableObject
     private void LoadData()
     {
         _currentProfile = _configService.LoadProfile();
+        
+        // Veri yüklendikten sonra Grid'i olmasý gereken sayýya tamamla
+        RefreshGrid();
+    }
+
+    // Buton listesini yeni boyutlara göre ayarlar
+    private void RefreshGrid()
+    {
+        int totalSlots = Rows * Columns;
+        
+        // Mevcut verileri koru ama görünümü yeni boyuta ayarla
         DeckItems.Clear();
-        foreach (var item in _currentProfile.Items) DeckItems.Add(item);
+        
+        for (int i = 0; i < totalSlots; i++)
+        {
+            // Eðer kayýtlý veri yetmiyorsa yeni boþ buton oluþtur
+            if (i >= _currentProfile.Items.Count)
+            {
+                _currentProfile.Items.Add(new DeckItem 
+                { 
+                    Title = "Boþ", 
+                    Color = "#222222",
+                    Row = i / Columns,
+                    Column = i % Columns
+                });
+            }
+            DeckItems.Add(_currentProfile.Items[i]);
+        }
     }
 
     private void OnItemClick(object? parameter)
@@ -107,33 +163,42 @@ public class MainViewModel : ObservableObject
 
     public void HandleFileDrop(DeckItem targetItem, string filePath)
     {
-        // Dosya uzantýsýný al
         string ext = System.IO.Path.GetExtension(filePath).ToLower();
         string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
 
-        // 1. Eðer resim dosyasýysa (Ýleride Ýkon desteði için hazýrlýk)
+        // 1. Eðer resim dosasýysa
         if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".ico")
         {
-            // Þimdilik sadece konsept olarak buradayýz, henüz IconPath property'miz UI'da yok.
-            // targetItem.IconPath = filePath; 
-            MessageBox.Show("Resim desteði bir sonraki adýmda eklenecek!", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+            targetItem.IconPath = filePath;
+            targetItem.Title = ""; // Ýsteðe baðlý: Resim atýnca yazýyý silebilirsiniz
+            if (IsEditMode) SelectedDeckItem = targetItem;
             return; 
         }
 
-        // 2. Eðer kýsayol (.lnk) veya çalýþtýrýlabilir (.exe) dosya ise
+        // 2. Eðer EXE veya Kýsayol ise (GÜNCELLENDÝ)
         if (ext == ".exe" || ext == ".lnk" || ext == ".bat")
         {
-            // Butonun özelliklerini güncelle
-            targetItem.Title = fileName;       // Dosya adýný baþlýk yap
-            targetItem.Command = filePath;     // Dosya yolunu komut yap
-            targetItem.ActionType = "Execute"; // Tipi otomatik Execute yap
+            targetItem.Title = fileName;
+            targetItem.Command = filePath;
+            targetItem.ActionType = "Execute";
+
+            // --- ÝKON ÇIKARMA ÝÞLEMÝ ---
             
-            // Seçili butonu güncelle (Eðer edit modundaysak sað panel dolsun)
-            if (IsEditMode)
+            // Ýkonlarýn kaydedileceði klasör: %AppData%/StreamDeckWidgetApp/CachedIcons
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string iconsFolder = System.IO.Path.Combine(appData, "StreamDeckWidgetApp", "CachedIcons");
+
+            // Helper sýnýfýný çaðýr
+            string? newIconPath = IconHelper.ExtractAndSaveIcon(filePath, iconsFolder);
+
+            if (!string.IsNullOrEmpty(newIconPath))
             {
-                SelectedDeckItem = null; // Önce null yap
-                SelectedDeckItem = targetItem; // Sonra tekrar ata (UI refresh için)
+                targetItem.IconPath = newIconPath; // Butonun resmi artýk EXE'nin ikonu!
             }
+            
+            // ---------------------------
+
+            if (IsEditMode) SelectedDeckItem = targetItem;
             
             // Otomatik kaydet
             _currentProfile.Items = DeckItems.ToList();

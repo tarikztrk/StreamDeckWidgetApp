@@ -12,6 +12,7 @@ public class DeckItem : ObservableObject
     private string _color = "#333333";
     private int _row;
     private int _column;
+    private string? _iconPath;
 
     public string Id
     {
@@ -57,5 +58,18 @@ public class DeckItem : ObservableObject
     {
         get => _column;
         set { _column = value; OnPropertyChanged(); }
+    }
+
+    public string? IconPath
+    {
+        get => _iconPath;
+        set 
+        { 
+            if (_iconPath != value) // Gereksiz tetiklemeyi önle
+            {
+                _iconPath = value;
+                OnPropertyChanged(); // UI'a bildir
+            }
+        }
     }
 }
