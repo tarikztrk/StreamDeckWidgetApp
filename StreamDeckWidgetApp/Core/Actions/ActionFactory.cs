@@ -14,8 +14,8 @@ public class ActionFactory
 
         Register(new ExecuteAppAction());
         Register(new WebsiteAction());
+        Register(new HotkeyAction());
         
-        // Yarýn buraya Register(new HotkeyAction()) gelecek.
     }
 
     private void Register(IActionRunner runner)
