@@ -25,7 +25,7 @@ public partial class App : Application
         services.AddSingleton<IConfigService, JsonConfigService>();
 
         // ViewModel'leri Kayıt Et
-        services.AddTransient<MainViewModel>();
+        services.AddSingleton<MainViewModel>();
         services.AddTransient<EditorViewModel>();
 
         // View'ları Kayıt Et
