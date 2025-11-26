@@ -143,18 +143,24 @@ public class MainViewModel : ObservableObject
         
         for (int i = 0; i < totalSlots; i++)
         {
-            // E�er kay�tl� veri yetmiyorsa yeni bo� buton olu�tur
+            // Eğer kayıtlı veri yetmiyorsa yeni boş buton oluştur
             if (i >= _currentProfile.Items.Count)
             {
-                _currentProfile.Items.Add(new DeckItem 
-                { 
-                    Title = "Bo�", 
+                _currentProfile.Items.Add(new DeckItem
+                {
+                    Title = "Boş",
                     Color = "#222222",
                     Row = i / Columns,
                     Column = i % Columns
                 });
             }
-            DeckItems.Add(_currentProfile.Items[i]);
+
+            // Her elemanın satır/sütun bilgisini güncelle - tutarlılık için önemli
+            var item = _currentProfile.Items[i];
+            item.Row = i / Columns;
+            item.Column = i % Columns;
+
+            DeckItems.Add(item);
         }
     }
 
