@@ -12,6 +12,9 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = viewModel; // DataBinding baglantisi
+        
+        // ViewModel'e MainWindow referansını ver (Modal mod için)
+        viewModel.SetMainWindow(this);
     }
 
     // Pencereyi suruklemek icin gerekli (MVVM'de View logic kabul edilir)

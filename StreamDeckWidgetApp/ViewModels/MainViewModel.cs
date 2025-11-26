@@ -17,6 +17,7 @@ public class MainViewModel : ObservableObject
     private readonly Func<EditorViewModel> _editorViewModelFactory;
     private readonly Func<EditorWindow> _editorWindowFactory;
     private Profile _currentProfile = null!;
+    private Window? _mainWindow; // Widget penceresi referansı
 
     // --- State Properties ---
     
@@ -252,19 +253,48 @@ public class MainViewModel : ObservableObject
             return;
         }
 
-        // DI ile EditorWindow ve EditorViewModel oluştur
-        _editorWindow = _editorWindowFactory();
-        var editorViewModel = _editorViewModelFactory();
-        
-        // EditorViewModel'e window referansını ver
-        editorViewModel.SetWindow(_editorWindow);
-        _editorWindow.DataContext = editorViewModel;
-        
-        // Pencere kapanınca referansı temizle
-        _editorWindow.Closed += (s, e) => OnEditorClosed();
+        try
+        {
+            // Widget penceresini animasyonlu gizle (Modal mod)
+            if (_mainWindow != null)
+            {
+                // FadeOut animasyonu
+                var fadeOut = new System.Windows.Media.Animation.DoubleAnimation
+                {
+                    From = 1.0,
+                    To = 0.0,
+                    Duration = TimeSpan.FromMilliseconds(200)
+                };
+                fadeOut.Completed += (s, e) => _mainWindow.Hide();
+                _mainWindow.BeginAnimation(Window.OpacityProperty, fadeOut);
+            }
 
-        _editorWindow.Show();
-        OnPropertyChanged(nameof(IsEditorOpen));
+            // DI ile EditorWindow ve EditorViewModel oluştur
+            _editorWindow = _editorWindowFactory();
+            var editorViewModel = _editorViewModelFactory();
+            
+            // EditorViewModel'e window referansını ver
+            editorViewModel.SetWindow(_editorWindow);
+            _editorWindow.DataContext = editorViewModel;
+            
+            // Pencere kapanınca referansı temizle ve Widget'ı göster
+            _editorWindow.Closed += (s, e) => OnEditorClosed();
+
+            _editorWindow.Show();
+            OnPropertyChanged(nameof(IsEditorOpen));
+        }
+        catch (Exception ex)
+        {
+            // Editör açılamazsa Widget'ı tekrar göster (Risk Önlemi)
+            if (_mainWindow != null)
+            {
+                _mainWindow.Opacity = 1.0;
+                _mainWindow.Show();
+            }
+            
+            MessageBox.Show($"Editör açılırken hata oluştu: {ex.Message}", 
+                "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     /// <summary>
@@ -275,6 +305,31 @@ public class MainViewModel : ObservableObject
         _editorWindow = null;
         SelectedDeckItem = null;
         OnPropertyChanged(nameof(IsEditorOpen));
+        
+        // Widget'ı animasyonlu göster (Modal mod sonu)
+        if (_mainWindow != null)
+        {
+            _mainWindow.Opacity = 0.0;
+            _mainWindow.Show();
+            _mainWindow.Activate();
+            
+            // FadeIn animasyonu
+            var fadeIn = new System.Windows.Media.Animation.DoubleAnimation
+            {
+                From = 0.0,
+                To = 1.0,
+                Duration = TimeSpan.FromMilliseconds(300)
+            };
+            _mainWindow.BeginAnimation(Window.OpacityProperty, fadeIn);
+        }
+    }
+    
+    /// <summary>
+    /// MainWindow referansını ayarla (Constructor'dan çağrılır)
+    /// </summary>
+    public void SetMainWindow(Window mainWindow)
+    {
+        _mainWindow = mainWindow;
     }
 
     public void SaveChanges()

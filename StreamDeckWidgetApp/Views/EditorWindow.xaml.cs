@@ -56,4 +56,48 @@ public partial class EditorWindow : Window
             }
         }
     }
+
+    /// <summary>
+    /// Sanal grid üzerine drop (Preset veya Swap)
+    /// </summary>
+    private void PreviewGrid_Drop(object sender, DragEventArgs e)
+    {
+        if (DataContext is not EditorViewModel vm) return;
+        if (sender is not System.Windows.FrameworkElement element) return;
+        if (element.DataContext is not DeckItem targetItem) return;
+
+        // 1. Preset sürükleme
+        if (e.Data.GetDataPresent("StreamDeckPreset"))
+        {
+            if (e.Data.GetData("StreamDeckPreset") is PresetModel preset)
+            {
+                var deckItem = preset.ToDeckItem();
+                targetItem.Title = deckItem.Title;
+                targetItem.ActionType = deckItem.ActionType;
+                targetItem.Command = deckItem.Command;
+                targetItem.Color = deckItem.Color;
+                targetItem.BehaviorType = deckItem.BehaviorType;
+
+                // Seçili yap
+                vm.SelectedDeckItem = targetItem;
+            }
+        }
+        // 2. İleride: Buton swap mantığı buraya eklenecek
+    }
+
+    /// <summary>
+    /// Drag over için görsel geri bildirim
+    /// </summary>
+    private void PreviewGrid_DragOver(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent("StreamDeckPreset"))
+        {
+            e.Effects = DragDropEffects.Copy;
+        }
+        else
+        {
+            e.Effects = DragDropEffects.None;
+        }
+        e.Handled = true;
+    }
 }

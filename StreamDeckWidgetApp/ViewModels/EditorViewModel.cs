@@ -21,6 +21,7 @@ public class EditorViewModel : ObservableObject
     // --- Commands ---
     public ICommand CloseCommand { get; }
     public ICommand SaveCommand { get; }
+    public ICommand ItemClickCommand => _mainViewModel.ItemClickCommand; // Proxy
 
     // --- Save Status Property ---
     public string SaveStatus
