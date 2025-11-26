@@ -5,6 +5,7 @@ using StreamDeckWidgetApp.Abstractions;
 using StreamDeckWidgetApp.Core;
 using StreamDeckWidgetApp.Core.Helpers;
 using StreamDeckWidgetApp.Models;
+using StreamDeckWidgetApp.Views;
 
 namespace StreamDeckWidgetApp.ViewModels;
 
@@ -16,20 +17,11 @@ public class MainViewModel : ObservableObject
 
     // --- State Properties ---
     
-    private bool _isEditMode;
-    public bool IsEditMode
-    {
-        get => _isEditMode;
-        set
-        {
-            if (SetField(ref _isEditMode, value))
-            {
-                // Mod değişince seçimi sıfırla
-                if (!value) SelectedDeckItem = null;
-                UpdateWindowSize(); // Panel açılınca pencere büyüsün
-            }
-        }
-    }
+    // Editör penceresinin referansı (Aynı anda sadece 1 tane açık olsun)
+    private EditorWindow? _editorWindow;
+
+    // Editör açık mı? (Widget butonlarına basınca işlem mi yapsın, seçim mi?)
+    public bool IsEditorOpen => _editorWindow != null;
 
     private DeckItem? _selectedDeckItem;
     public DeckItem? SelectedDeckItem
@@ -49,7 +41,6 @@ public class MainViewModel : ObservableObject
                 _currentProfile.Rows = value;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
-                UpdateWindowSize(); // Boyut değişince pencereyi güncelle
             }
         }
     }
@@ -64,7 +55,6 @@ public class MainViewModel : ObservableObject
                 _currentProfile.Columns = value;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
-                UpdateWindowSize(); // Boyut değişince pencereyi güncelle
             }
         }
     }
@@ -87,26 +77,10 @@ public class MainViewModel : ObservableObject
             {
                 _currentProfile.ButtonSize = value;
                 OnPropertyChanged();
-                UpdateWindowSize(); // Boyut değişince pencereyi güncelle
             }
         }
     }
 
-    // Pencere Boyut Özellikleri
-    private double _windowWidth;
-    public double WindowWidth
-    {
-        get => _windowWidth;
-        set => SetField(ref _windowWidth, value);
-    }
-
-    private double _windowHeight;
-    public double WindowHeight
-    {
-        get => _windowHeight;
-        set => SetField(ref _windowHeight, value);
-    }
-    
     // ComboBox için Action Tipleri
     public List<string> ActionTypes { get; } = new() { "Execute", "Hotkey", "Website" };
 
@@ -115,7 +89,7 @@ public class MainViewModel : ObservableObject
     // --- Commands ---
     public ICommand ItemClickCommand { get; }
     public ICommand CloseAppCommand { get; }
-    public ICommand ToggleEditModeCommand { get; }
+    public ICommand OpenEditorCommand { get; }
     public ICommand SaveCommand { get; }
 
     public MainViewModel(IActionService actionService, IConfigService configService)
@@ -133,10 +107,10 @@ public class MainViewModel : ObservableObject
             Application.Current.Shutdown();
         });
         
-        // Edit Modunu A�/Kapat
-        ToggleEditModeCommand = new RelayCommand(_ => IsEditMode = !IsEditMode);
+        // Editör Penceresini Aç
+        OpenEditorCommand = new RelayCommand(_ => OpenEditor());
         
-        // De�i�iklikleri Kaydet
+        // Değişiklikleri Kaydet
         SaveCommand = new RelayCommand(_ => SaveChanges());
     }
 
@@ -149,7 +123,6 @@ public class MainViewModel : ObservableObject
         
         // Veri yüklendikten sonra Grid'i olması gereken sayıya tamamla
         RefreshGrid();
-        UpdateWindowSize(); // İlk yüklemede boyutu hesapla
     }
 
     // Buton listesini yeni boyutlara g�re ayarlar
@@ -177,39 +150,46 @@ public class MainViewModel : ObservableObject
         }
     }
 
-    // Pencere boyutunu hesapla
-    private void UpdateWindowSize()
-    {
-        // Temel hesaplama: (Hücre Sayısı * Hücre Boyutu) + Kenar Payları
-        double baseWidth = (Columns * SelectedButtonSize) + 30; // 30px kenar payı
-        double baseHeight = (Rows * SelectedButtonSize) + 50;   // 50px header + kenar payı
 
-        // Eğer Edit Modu açıksa, sağdaki panel için ekstra yer aç (örn: 220px)
-        if (IsEditMode)
-        {
-            baseWidth += 220; 
-        }
-
-        // Minimum boyut kontrolü (Pencere çok küçülüp yok olmasın)
-        WindowWidth = Math.Max(baseWidth, 200);
-        WindowHeight = Math.Max(baseHeight, 150);
-    }
 
     private void OnItemClick(object? parameter)
     {
         if (parameter is DeckItem item)
         {
-            if (IsEditMode)
+            if (IsEditorOpen) // Editör açıksa SEÇ
             {
-                // D�zenleme modundaysak: Se�
-                SelectedDeckItem = item; 
+                SelectedDeckItem = item;
             }
-            else
+            else // Kapalıysa ÇALIŞTIR
             {
-                // Normal moddaysak: �al��t�r
                 _actionService.ExecuteItem(item);
             }
         }
+    }
+
+    private void OpenEditor()
+    {
+        // Eğer zaten açıksa öne getir
+        if (_editorWindow != null)
+        {
+            _editorWindow.Activate();
+            return;
+        }
+
+        // Yeni pencere oluştur ve BU ViewModel'i ona da ver (Sharing Data)
+        _editorWindow = new EditorWindow();
+        _editorWindow.DataContext = this; // <--- EN ÖNEMLİ KISIM: Veri Paylaşımı
+        
+        // Pencere kapanınca referansı temizle
+        _editorWindow.Closed += (s, e) => 
+        { 
+            _editorWindow = null; 
+            SelectedDeckItem = null; // Editör kapanınca seçimi kaldır
+            OnPropertyChanged(nameof(IsEditorOpen)); // UI güncellensin
+        };
+
+        _editorWindow.Show();
+        OnPropertyChanged(nameof(IsEditorOpen));
     }
 
     private void SaveChanges()
@@ -217,11 +197,8 @@ public class MainViewModel : ObservableObject
         _currentProfile.Items = DeckItems.ToList();
         _configService.SaveProfile(_currentProfile);
         
-        if (IsEditMode)
-        {
-            MessageBox.Show("Ayarlar Kaydedildi!", "Stream Deck", MessageBoxButton.OK, MessageBoxImage.Information);
-            IsEditMode = false; // Kaydettikten sonra moddan ��k
-        }
+        // Editör penceresini kapat
+        _editorWindow?.Close();
     }
 
     public void HandleFileDrop(DeckItem targetItem, string filePath)
@@ -233,8 +210,8 @@ public class MainViewModel : ObservableObject
         if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".ico")
         {
             targetItem.IconPath = filePath;
-            targetItem.Title = ""; // �ste�e ba�l�: Resim at�nca yaz�y� silebilirsiniz
-            if (IsEditMode) SelectedDeckItem = targetItem;
+            targetItem.Title = ""; // İsteğe bağlı: Resim atınca yazıyı silebilirsiniz
+            if (IsEditorOpen) SelectedDeckItem = targetItem;
             return; 
         }
 
@@ -261,7 +238,7 @@ public class MainViewModel : ObservableObject
             
             // ---------------------------
 
-            if (IsEditMode) SelectedDeckItem = targetItem;
+            if (IsEditorOpen) SelectedDeckItem = targetItem;
             
             // Otomatik kaydet
             _currentProfile.Items = DeckItems.ToList();
