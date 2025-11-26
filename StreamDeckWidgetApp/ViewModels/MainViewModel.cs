@@ -5,6 +5,7 @@ using StreamDeckWidgetApp.Abstractions;
 using StreamDeckWidgetApp.Core;
 using StreamDeckWidgetApp.Core.Helpers;
 using StreamDeckWidgetApp.Models;
+using StreamDeckWidgetApp.Services;
 using StreamDeckWidgetApp.Views;
 
 namespace StreamDeckWidgetApp.ViewModels;
@@ -15,7 +16,7 @@ public class MainViewModel : ObservableObject
     private readonly IConfigService _configService;
     private readonly Func<EditorViewModel> _editorViewModelFactory;
     private readonly Func<EditorWindow> _editorWindowFactory;
-    private Profile _currentProfile;
+    private Profile _currentProfile = null!;
 
     // --- State Properties ---
     
@@ -98,6 +99,42 @@ public class MainViewModel : ObservableObject
     public List<string> ActionTypes { get; } = new() { "Execute", "Hotkey", "Website" };
 
     public ObservableCollection<DeckItem> DeckItems { get; set; }
+    
+    // --- Preset Library ---
+    private ObservableCollection<PresetModel> _libraryItems;
+    public ObservableCollection<PresetModel> LibraryItems
+    {
+        get => _libraryItems;
+        set => SetField(ref _libraryItems, value);
+    }
+    
+    private string _librarySearchText = string.Empty;
+    public string LibrarySearchText
+    {
+        get => _librarySearchText;
+        set
+        {
+            if (SetField(ref _librarySearchText, value))
+            {
+                FilterLibrary();
+            }
+        }
+    }
+    
+    private string _selectedCategory = "Tümü";
+    public string SelectedCategory
+    {
+        get => _selectedCategory;
+        set
+        {
+            if (SetField(ref _selectedCategory, value))
+            {
+                FilterLibrary();
+            }
+        }
+    }
+    
+    public List<string> LibraryCategories { get; } = new() { "Tümü" };
 
     // --- Commands ---
     public ICommand ItemClickCommand { get; }
@@ -116,6 +153,10 @@ public class MainViewModel : ObservableObject
         _editorViewModelFactory = editorViewModelFactory;
         _editorWindowFactory = editorWindowFactory;
         DeckItems = new ObservableCollection<DeckItem>();
+        _libraryItems = new ObservableCollection<PresetModel>();
+        
+        // Kütüphane kategorilerini yükle
+        LibraryCategories.AddRange(PresetService.GetCategories());
         
         LoadData();
 
@@ -131,6 +172,9 @@ public class MainViewModel : ObservableObject
         
         // Değişiklikleri Kaydet
         SaveCommand = new RelayCommand(_ => SaveChanges());
+        
+        // Kütüphaneyi ilk yükle
+        LoadLibrary();
     }
 
     private void LoadData()
@@ -289,5 +333,59 @@ public class MainViewModel : ObservableObject
             _currentProfile.Items = DeckItems.ToList();
             _configService.SaveProfile(_currentProfile);
         }
+    }
+    
+    // --- Preset Library Methods ---
+    
+    private void LoadLibrary()
+    {
+        var allPresets = PresetService.GetAllPresets();
+        LibraryItems.Clear();
+        foreach (var preset in allPresets)
+        {
+            LibraryItems.Add(preset);
+        }
+    }
+    
+    private void FilterLibrary()
+    {
+        var allPresets = PresetService.GetAllPresets();
+        
+        // Kategori filtresi
+        if (SelectedCategory != "Tümü")
+        {
+            allPresets = allPresets.Where(p => p.Category == SelectedCategory).ToList();
+        }
+        
+        // Arama filtresi
+        if (!string.IsNullOrWhiteSpace(LibrarySearchText))
+        {
+            allPresets = PresetService.SearchPresets(LibrarySearchText);
+            if (SelectedCategory != "Tümü")
+            {
+                allPresets = allPresets.Where(p => p.Category == SelectedCategory).ToList();
+            }
+        }
+        
+        LibraryItems.Clear();
+        foreach (var preset in allPresets)
+        {
+            LibraryItems.Add(preset);
+        }
+    }
+    
+    /// <summary>
+    /// Preset'i seçili butona uygula
+    /// </summary>
+    public void ApplyPresetToSelectedItem(PresetModel preset)
+    {
+        if (SelectedDeckItem == null) return;
+        
+        var deckItem = preset.ToDeckItem();
+        SelectedDeckItem.Title = deckItem.Title;
+        SelectedDeckItem.ActionType = deckItem.ActionType;
+        SelectedDeckItem.Command = deckItem.Command;
+        SelectedDeckItem.Color = deckItem.Color;
+        SelectedDeckItem.BehaviorType = deckItem.BehaviorType;
     }
 }

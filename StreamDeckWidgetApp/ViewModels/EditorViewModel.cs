@@ -57,6 +57,23 @@ public class EditorViewModel : ObservableObject
     public Dictionary<string, int> ButtonSizeOptions => _mainViewModel.ButtonSizeOptions;
     public List<string> ActionTypes => _mainViewModel.ActionTypes;
     public ObservableCollection<DeckItem> DeckItems => _mainViewModel.DeckItems;
+    
+    // --- Library Properties (Proxy from MainViewModel) ---
+    public ObservableCollection<PresetModel> LibraryItems => _mainViewModel.LibraryItems;
+    
+    public string LibrarySearchText
+    {
+        get => _mainViewModel.LibrarySearchText;
+        set => _mainViewModel.LibrarySearchText = value;
+    }
+    
+    public string SelectedCategory
+    {
+        get => _mainViewModel.SelectedCategory;
+        set => _mainViewModel.SelectedCategory = value;
+    }
+    
+    public List<string> LibraryCategories => _mainViewModel.LibraryCategories;
 
     public EditorViewModel(MainViewModel mainViewModel)
     {

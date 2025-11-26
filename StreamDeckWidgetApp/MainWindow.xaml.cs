@@ -24,8 +24,36 @@ public partial class MainWindow : Window
     // Drag & Drop Event Handler
     private void Button_Drop(object sender, DragEventArgs e)
     {
-        // 1. Suruklenen sey bir dosya mi?
-        if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        // 1. Önce preset kontrolü yap (Özel format)
+        if (e.Data.GetDataPresent("StreamDeckPreset"))
+        {
+            // Kütüphaneden sürüklenen preset
+            if (e.Data.GetData("StreamDeckPreset") is PresetModel preset)
+            {
+                // Hangi butona bırakıldı?
+                if (sender is FrameworkElement element && element.DataContext is DeckItem targetItem)
+                {
+                    // Preset verilerini butona uygula
+                    var deckItem = preset.ToDeckItem();
+                    targetItem.Title = deckItem.Title;
+                    targetItem.ActionType = deckItem.ActionType;
+                    targetItem.Command = deckItem.Command;
+                    targetItem.Color = deckItem.Color;
+                    targetItem.BehaviorType = deckItem.BehaviorType;
+
+                    // ViewModel'e bildir (seçili buton olarak işaretle)
+                    if (DataContext is MainViewModel vm)
+                    {
+                        if (vm.IsEditorOpen)
+                        {
+                            vm.SelectedDeckItem = targetItem;
+                        }
+                    }
+                }
+            }
+        }
+        // 2. Sürüklenen şey bir dosya mı?
+        else if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
             // Dosya yollarini dizi olarak al (Birden fazla dosya suruklenebilir, biz ilkini alacagiz)
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
