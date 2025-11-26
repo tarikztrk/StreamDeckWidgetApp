@@ -29,7 +29,18 @@ public class MainViewModel : ObservableObject
     public DeckItem? SelectedDeckItem
     {
         get => _selectedDeckItem;
-        set => SetField(ref _selectedDeckItem, value);
+        set
+        {
+            // Önceki seçimi temizle
+            if (_selectedDeckItem != null)
+                _selectedDeckItem.IsSelected = false;
+            
+            SetField(ref _selectedDeckItem, value);
+            
+            // Yeni seçimi işaretle
+            if (_selectedDeckItem != null)
+                _selectedDeckItem.IsSelected = true;
+        }
     }
     
     // Grid Boyutları - Dinamik Olarak Değiştirilebilir
@@ -219,7 +230,11 @@ public class MainViewModel : ObservableObject
     {
         _currentProfile.Items = DeckItems.ToList();
         _configService.SaveProfile(_currentProfile);
-        
+    }
+    
+    public void SaveAndCloseEditor()
+    {
+        SaveChanges();
         // Editör penceresini kapat
         _editorWindow?.Close();
     }

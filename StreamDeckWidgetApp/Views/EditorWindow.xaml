@@ -171,6 +171,11 @@
                 <TextBlock Text="Stream Deck Kontrol Merkezi" Foreground="#888" 
                            VerticalAlignment="Center" Margin="20,0,0,0" FontSize="12" IsHitTestVisible="False"/>
                 
+                <!-- Kayıt Durumu Göstergesi -->
+                <TextBlock Text="{Binding SaveStatus}" Foreground="{StaticResource AccentColor}" 
+                           VerticalAlignment="Center" HorizontalAlignment="Center" 
+                           FontSize="11" FontWeight="SemiBold" IsHitTestVisible="False"/>
+                
                 <!-- Kapatma Butonu -->
                 <Button Command="{Binding CloseCommand}" Content="X"  HorizontalAlignment="Right"
                             Width="40" Height="40"
@@ -218,10 +223,10 @@
 
                     <Separator Background="#333" Margin="0,20"/>
 
-                    <!-- Kaydet Butonu -->
-                    <Button Command="{Binding SaveCommand}" Content="💾 TÜMÜNÜ KAYDET" Style="{StaticResource PrimaryBtn}"/>
+                    <!-- Manuel Kaydet Butonu -->
+                    <Button Command="{Binding SaveCommand}" Content="💾 ŞİMDİ KAYDET" Style="{StaticResource PrimaryBtn}"/>
                     
-                    <TextBlock Text="Değişiklikler anlık olarak widget'a yansır." 
+                    <TextBlock Text="Değişiklikler otomatik olarak kaydedilir." 
                                Foreground="#555" FontSize="11" TextWrapping="Wrap" Margin="0,10,0,0" TextAlignment="Center"/>
                 </StackPanel>
             </Border>
@@ -292,9 +297,20 @@
                                  Height="80" TextWrapping="Wrap" VerticalContentAlignment="Top" AcceptsReturn="True"/>
 
                         <Border Background="#2A2A2A" CornerRadius="5" Padding="10" Margin="0,10,0,0">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="💡 İpucu: " Foreground="{StaticResource AccentColor}"/>
-                                <TextBlock Text="Hotkey için 'COPY', 'PASTE', 'SCREENSHOT' gibi komutlar kullanın." Foreground="#888"/>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="💡 İpucu: " Foreground="{StaticResource AccentColor}" FontWeight="Bold"/>
+                                    <TextBlock Text="Aksiyon tipine göre komut örnekleri:" Foreground="#AAA"/>
+                                </StackPanel>
+                                <TextBlock Foreground="#888" FontSize="11" Margin="15,0,0,2">
+                                    <Run Text="• Execute:" FontWeight="Bold"/> C:\Program Files\app.exe veya https://google.com
+                                </TextBlock>
+                                <TextBlock Foreground="#888" FontSize="11" Margin="15,0,0,2">
+                                    <Run Text="• Hotkey:" FontWeight="Bold"/> COPY, PASTE, SCREENSHOT, ALT+TAB
+                                </TextBlock>
+                                <TextBlock Foreground="#888" FontSize="11" Margin="15,0,0,0">
+                                    <Run Text="• Drag &amp; Drop:" FontWeight="Bold"/> .exe, .lnk veya resim dosyası sürükleyin
+                                </TextBlock>
                             </StackPanel>
                         </Border>
 

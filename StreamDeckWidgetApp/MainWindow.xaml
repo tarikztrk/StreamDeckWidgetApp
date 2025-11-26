@@ -19,7 +19,18 @@
         <converters:ImagePathToImageSourceConverter x:Key="PathToImage"/>
     </Window.Resources>
 
-    <Border Background="#1E1E1E" CornerRadius="15" BorderBrush="#444" BorderThickness="1">
+    <Border Background="#1E1E1E" CornerRadius="15" BorderThickness="2">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="BorderBrush" Value="#444"/>
+                <Style.Triggers>
+                    <!-- Editör açıkken kenarlık maviye dönsün -->
+                    <DataTrigger Binding="{Binding IsEditorOpen}" Value="True">
+                        <Setter Property="BorderBrush" Value="#4CC2FF"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         <Grid Margin="15">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -67,7 +78,19 @@
                                                             CornerRadius="8" 
                                                             Padding="5"
                                                             AllowDrop="True"
-                                                            Drop="Button_Drop">
+                                                            Drop="Button_Drop"
+                                                            BorderThickness="3">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                    <!-- Seçili buton vurgusu -->
+                                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                        <Setter Property="BorderBrush" Value="#4CC2FF"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
                                                         <Grid>
                                                             <Image Source="{Binding IconPath, Converter={StaticResource PathToImage}}" 
                                                                    Stretch="UniformToFill"

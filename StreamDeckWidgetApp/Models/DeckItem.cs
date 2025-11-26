@@ -2,7 +2,7 @@ using StreamDeckWidgetApp.Core; // ObservableObject burada
 
 namespace StreamDeckWidgetApp.Models;
 
-// ObservableObject'ten miras alýyoruz ki deðiþiklikleri UI'a haber versin
+// ObservableObject'ten miras alï¿½yoruz ki deï¿½iï¿½iklikleri UI'a haber versin
 public class DeckItem : ObservableObject
 {
     private string _id = Guid.NewGuid().ToString();
@@ -13,11 +13,18 @@ public class DeckItem : ObservableObject
     private int _row;
     private int _column;
     private string? _iconPath;
+    private bool _isSelected;
 
     public string Id
     {
         get => _id;
         set { _id = value; OnPropertyChanged(); }
+    }
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set { _isSelected = value; OnPropertyChanged(); }
     }
 
     public string Title
@@ -65,7 +72,7 @@ public class DeckItem : ObservableObject
         get => _iconPath;
         set 
         { 
-            if (_iconPath != value) // Gereksiz tetiklemeyi önle
+            if (_iconPath != value) // Gereksiz tetiklemeyi ï¿½nle
             {
                 _iconPath = value;
                 OnPropertyChanged(); // UI'a bildir
