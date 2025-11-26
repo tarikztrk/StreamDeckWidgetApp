@@ -6,7 +6,8 @@
         xmlns:converters="clr-namespace:StreamDeckWidgetApp.Core.Converters"
         xmlns:behaviors="clr-namespace:StreamDeckWidgetApp.Core.Behaviors"
         mc:Ignorable="d"
-        Title="Stream Deck Control Center" Height="600" Width="900"
+        Title="Stream Deck Control Center" MinHeight="600" MinWidth="900"
+        SizeToContent="WidthAndHeight"
         WindowStyle="None"
         AllowsTransparency="True"
         ResizeMode="CanResizeWithGrip"
@@ -158,8 +159,9 @@
     <Border Background="{StaticResource BgDark}" CornerRadius="10" BorderBrush="#333" BorderThickness="1">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="280"/> <!-- SOL MENÜ -->
-                <ColumnDefinition Width="*"/>   <!-- SAĞ İÇERİK -->
+                <ColumnDefinition Width="280"/> <!-- SOL PANEL: AYARLAR -->
+                <ColumnDefinition Width="Auto"/>   <!-- ORTA: ÖNİZLEME + DETAY -->
+                <ColumnDefinition Width="320"/> <!-- SAĞ PANEL: KÜTÜPHANE -->
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- BAŞLIK -->
@@ -167,7 +169,7 @@
             </Grid.RowDefinitions>
 
             <!-- 1. HEADER (SÜRÜKLENEBİLİR ALAN) -->
-            <Grid Grid.ColumnSpan="2" Height="40" Background="Transparent">
+            <Grid Grid.ColumnSpan="3" Height="40" Background="Transparent">
                 <TextBlock Text="Stream Deck Kontrol Merkezi" Foreground="#888" 
                            VerticalAlignment="Center" Margin="20,0,0,0" FontSize="12" IsHitTestVisible="False"/>
                 
@@ -182,220 +184,59 @@
                             Background="Transparent" Foreground="#888" BorderThickness="0" Cursor="Hand"/>
             </Grid>
 
-            <!-- 2. SOL PANEL (SEKMELİ YAPIYI EKLE) -->
+            <!-- 2. SOL PANEL (AYARLAR) -->
             <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource BgPanel}" 
-                    CornerRadius="0,0,0,10" Padding="0">
-                <TabControl Background="Transparent" BorderThickness="0">
-                    <TabControl.Resources>
-                        <!-- Tab Header Stili -->
-                        <Style TargetType="TabItem">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Foreground" Value="#888"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="Padding" Value="15,10"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="TabItem">
-                                        <Border Background="{TemplateBinding Background}" 
-                                                BorderThickness="0,0,0,2" 
-                                                BorderBrush="Transparent">
-                                            <ContentPresenter ContentSource="Header" 
-                                                              HorizontalAlignment="Center" 
-                                                              VerticalAlignment="Center"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="Foreground" Value="White"/>
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Foreground" Value="White"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </TabControl.Resources>
-
-                    <!-- SEKME 1: AYARLAR -->
-                    <TabItem Header="⚙️ AYARLAR">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <StackPanel Margin="20">
-                                <!-- Grid Yapılandırması -->
-                                <Border Background="{StaticResource BgInput}" CornerRadius="8" Padding="15" Margin="0,0,0,20">
-                                    <StackPanel>
-                                        <TextBlock Text="Grid Düzeni" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
-                                        
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            
-                                            <StackPanel Grid.Column="0">
-                                                <TextBlock Text="SATIR" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
-                                                <TextBox Text="{Binding Rows, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
-                                            </StackPanel>
-
-                                            <StackPanel Grid.Column="2">
-                                                <TextBlock Text="SÜTUN" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
-                                                <TextBox Text="{Binding Columns, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Buton Boyutu -->
-                                <TextBlock Text="Buton Boyutu" Style="{StaticResource Label}"/>
-                                <ComboBox ItemsSource="{Binding ButtonSizeOptions}" 
-                                          SelectedValue="{Binding SelectedButtonSize}" 
-                                          SelectedValuePath="Value" 
-                                          DisplayMemberPath="Key"
-                                          Height="40" Background="{StaticResource BgInput}" Foreground="White" Padding="10"/>
-
-                                <Separator Background="#333" Margin="0,20"/>
-
-                                <!-- Manuel Kaydet Butonu -->
-                                <Button Command="{Binding SaveCommand}" Content="💾 ŞİMDİ KAYDET" Style="{StaticResource PrimaryBtn}"/>
+                    CornerRadius="0,0,0,10" Padding="15">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="⚙️ AYARLAR" Foreground="{StaticResource AccentColor}" 
+                                   FontWeight="Bold" FontSize="14" Margin="0,0,0,15"/>
+                        
+                        <!-- Grid Yapılandırması -->
+                        <Border Background="{StaticResource BgInput}" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="Grid Düzeni" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
                                 
-                                <TextBlock Text="Değişiklikler otomatik olarak kaydedilir." 
-                                           Foreground="#555" FontSize="11" TextWrapping="Wrap" Margin="0,10,0,0" TextAlignment="Center"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="SATIR" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
+                                        <TextBox Text="{Binding Rows, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="SÜTUN" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
+                                        <TextBox Text="{Binding Columns, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
                             </StackPanel>
-                        </ScrollViewer>
-                    </TabItem>
+                        </Border>
 
-                    <!-- SEKME 2: KÜTÜPHANE -->
-                    <TabItem Header="📚 KÜTÜPHANE">
-                        <Grid Margin="10">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
+                        <!-- Buton Boyutu -->
+                        <TextBlock Text="Buton Boyutu" Style="{StaticResource Label}" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding ButtonSizeOptions}" 
+                                  SelectedValue="{Binding SelectedButtonSize}" 
+                                  SelectedValuePath="Value" 
+                                  DisplayMemberPath="Key"
+                                  Height="40" Background="{StaticResource BgInput}" Foreground="White" Padding="10"/>
 
-                            <!-- Arama Çubuğu -->
-                            <TextBox Grid.Row="0" 
-                                     Text="{Binding DataContext.LibrarySearchText, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="{StaticResource BgInput}"
-                                     Foreground="White"
-                                     Padding="10"
-                                     Margin="5,5,5,10"
-                                     VerticalAlignment="Center">
-                                <TextBox.Style>
-                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                        <Style.Triggers>
-                                            <Trigger Property="Text" Value="">
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <VisualBrush Stretch="None">
-                                                            <VisualBrush.Visual>
-                                                                <TextBlock Text="🔍 Ara..." Foreground="#666" FontSize="14" Margin="5,0,0,0"/>
-                                                            </VisualBrush.Visual>
-                                                        </VisualBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBox.Style>
-                            </TextBox>
+                        <Separator Background="#333" Margin="0,20"/>
 
-                            <!-- Kategori Filtresi -->
-                            <ComboBox Grid.Row="1"
-                                      ItemsSource="{Binding DataContext.LibraryCategories, RelativeSource={RelativeSource AncestorType=Window}}"
-                                      SelectedItem="{Binding DataContext.SelectedCategory, RelativeSource={RelativeSource AncestorType=Window}}"
-                                      Height="35" 
-                                      Background="{StaticResource BgInput}" 
-                                      Foreground="White" 
-                                      Padding="10"
-                                      Margin="5,0,5,10"/>
-
-                            <!-- Preset Listesi -->
-                            <ListBox Grid.Row="2"
-                                     ItemsSource="{Binding DataContext.LibraryItems, RelativeSource={RelativeSource AncestorType=Window}}"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                     Margin="5,0,5,5"
-                                     PreviewMouseLeftButtonDown="PresetList_PreviewMouseLeftButtonDown"
-                                     MouseMove="PresetList_MouseMove">
-                                <ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="BorderThickness" Value="0"/>
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="Margin" Value="0,0,0,5"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ListBoxItem">
-                                                    <Border Background="{TemplateBinding Background}" 
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="6">
-                                                        <ContentPresenter/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#2A2A2A"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{StaticResource BgInput}" 
-                                                CornerRadius="6" 
-                                                Padding="10"
-                                                Cursor="Hand">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="40"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-
-                                                <!-- İkon -->
-                                                <Border Grid.Column="0" 
-                                                        Background="{Binding Color}" 
-                                                        CornerRadius="6" 
-                                                        Width="35" 
-                                                        Height="35"
-                                                        VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Icon}" 
-                                                               FontFamily="Segoe MDL2 Assets"
-                                                               FontSize="18" 
-                                                               Foreground="White"
-                                                               HorizontalAlignment="Center" 
-                                                               VerticalAlignment="Center"/>
-                                                </Border>
-
-                                                <!-- Bilgiler -->
-                                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Name}" 
-                                                               Foreground="White" 
-                                                               FontWeight="SemiBold"
-                                                               FontSize="12"/>
-                                                    <TextBlock Text="{Binding Description}" 
-                                                               Foreground="#888" 
-                                                               FontSize="10"
-                                                               TextTrimming="CharacterEllipsis"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Grid>
-                    </TabItem>
-                </TabControl>
+                        <!-- Manuel Kaydet Butonu -->
+                        <Button Command="{Binding SaveCommand}" Content="💾 ŞİMDİ KAYDET" Style="{StaticResource PrimaryBtn}"/>
+                        
+                        <TextBlock Text="Değişiklikler otomatik olarak kaydedilir." 
+                                   Foreground="#555" FontSize="11" TextWrapping="Wrap" Margin="0,10,0,0" TextAlignment="Center"/>
+                    </StackPanel>
+                </ScrollViewer>
             </Border>
 
-            <!-- 3. SAĞ PANEL (SANAL GRİD ÖNİZLEME + DETAY EDİTÖR) -->
+            <!-- 3. ORTA PANEL (SANAL GRİD ÖNİZLEME + DETAY EDİTÖR) -->
             <Grid Grid.Row="1" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Önizleme Başlık -->
@@ -410,74 +251,73 @@
                            FontWeight="Bold" FontSize="14" 
                            Margin="30,20,30,10"/>
 
-                <!-- Sanal Grid Container -->
-                <Border Grid.Row="1" Background="#0A0A0A" Margin="30,0" CornerRadius="10" 
-                        BorderBrush="#333" BorderThickness="1">
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                        <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
-                            <ItemsControl ItemsSource="{Binding DeckItems}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Columns="{Binding Columns}"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button Command="{Binding DataContext.ItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}"
-                                                Margin="5" BorderThickness="0"
-                                                Width="80" Height="80"
-                                                AllowDrop="True"
-                                                Drop="PreviewGrid_Drop"
-                                                DragOver="PreviewGrid_DragOver">
-                                            <Button.Style>
-                                                <Style TargetType="Button">
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="Button">
-                                                                <Border x:Name="MainBorder"
-                                                                        Background="{Binding Color}" 
-                                                                        CornerRadius="8" 
-                                                                        Padding="5"
-                                                                        BorderThickness="2">
-                                                                    <Border.Style>
-                                                                        <Style TargetType="Border">
-                                                                            <Setter Property="BorderBrush" Value="Transparent"/>
-                                                                            <!-- Boş slot için kesik çizgili border -->
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding Title}" Value="Boş">
-                                                                                    <Setter Property="BorderBrush" Value="#444"/>
-                                                                                    <Setter Property="BorderThickness" Value="2"/>
-                                                                                    <Setter Property="Background" Value="Transparent"/>
-                                                                                </DataTrigger>
-                                                                                <!-- Seçili buton -->
-                                                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                                    <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
-                                                                                    <Setter Property="BorderThickness" Value="3"/>
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </Border.Style>
-                                                                    <Grid>
-                                                                        <Image Source="{Binding IconPath, Converter={StaticResource PathToImage}}" 
-                                                                               Stretch="UniformToFill" Opacity="0.8"/>
-                                                                        
-                                                                        <TextBlock Text="{Binding Title}" 
-                                                                                   Foreground="White" 
-                                                                                   FontWeight="Bold" FontSize="10"
-                                                                                   HorizontalAlignment="Center" 
-                                                                                   VerticalAlignment="Center"
-                                                                                   TextWrapping="Wrap" 
-                                                                                   TextAlignment="Center"/>
-                                                                    </Grid>
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-                                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                                        <Setter TargetName="MainBorder" Property="Opacity" Value="0.8"/>
-                                                                    </Trigger>
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
+                <!-- Sanal Grid Container - Gerçek boyutlu butonlar -->
+                <Border Grid.Row="1" Background="#0A0A0A" Margin="20,0" CornerRadius="10" 
+                        BorderBrush="#333" BorderThickness="1" Padding="20">
+                    <ItemsControl ItemsSource="{Binding DeckItems}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="{Binding Columns}"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.ItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}"
+                                        Margin="5" BorderThickness="0"
+                                        Width="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                        Height="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        AllowDrop="True"
+                                        Drop="PreviewGrid_Drop"
+                                        DragOver="PreviewGrid_DragOver">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border x:Name="MainBorder"
+                                                                Background="{Binding Color}" 
+                                                                CornerRadius="8" 
+                                                                Padding="5"
+                                                                BorderThickness="2">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                                                    <!-- Boş slot için kesik çizgili border -->
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Title}" Value="Boş">
+                                                                            <Setter Property="BorderBrush" Value="#444"/>
+                                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                                            <Setter Property="Background" Value="Transparent"/>
+                                                                        </DataTrigger>
+                                                                        <!-- Seçili buton -->
+                                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+                                                                            <Setter Property="BorderThickness" Value="3"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <Grid>
+                                                                <Image Source="{Binding IconPath, Converter={StaticResource PathToImage}}" 
+                                                                       Stretch="UniformToFill" Opacity="0.8"/>
+                                                                
+                                                                <TextBlock Text="{Binding Title}" 
+                                                                           Foreground="White" 
+                                                                           FontWeight="Bold" FontSize="10"
+                                                                           HorizontalAlignment="Center" 
+                                                                           VerticalAlignment="Center"
+                                                                           TextWrapping="Wrap" 
+                                                                           TextAlignment="Center"/>
+                                                            </Grid>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="MainBorder" Property="Opacity" Value="0.8"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
                                                     </Setter>
                                                     <Setter Property="Cursor" Value="Hand"/>
                                                 </Style>
@@ -486,8 +326,6 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </Viewbox>
-                    </ScrollViewer>
                 </Border>
 
                 <!-- AYIRICI -->
@@ -599,6 +437,137 @@
                     </Grid>
                 </ScrollViewer>
             </Grid>
+
+            <!-- 4. SAĞ PANEL (KÜTÜPHANE) -->
+            <Border Grid.Row="1" Grid.Column="2" Background="{StaticResource BgPanel}" 
+                    CornerRadius="0,0,10,0" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="📚 KÜTÜPHANE" Foreground="{StaticResource AccentColor}" 
+                               FontWeight="Bold" FontSize="14" Margin="0,0,0,15"/>
+
+                    <!-- Arama Çubuğu -->
+                    <TextBox Grid.Row="1" 
+                             Text="{Binding LibrarySearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Background="{StaticResource BgInput}"
+                             Foreground="White"
+                             Padding="10"
+                             Margin="0,0,0,10"
+                             VerticalAlignment="Center">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <VisualBrush Stretch="None">
+                                                    <VisualBrush.Visual>
+                                                        <TextBlock Text="🔍 Ara..." Foreground="#666" FontSize="14" Margin="5,0,0,0"/>
+                                                    </VisualBrush.Visual>
+                                                </VisualBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+
+                    <!-- Kategori Filtresi -->
+                    <ComboBox Grid.Row="2"
+                              ItemsSource="{Binding LibraryCategories}"
+                              SelectedItem="{Binding SelectedCategory}"
+                              Height="35" 
+                              Background="{StaticResource BgInput}" 
+                              Foreground="White" 
+                              Padding="10"
+                              Margin="0,0,0,10"/>
+
+                    <!-- Preset Listesi -->
+                    <ListBox Grid.Row="3"
+                             ItemsSource="{Binding LibraryItems}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             PreviewMouseLeftButtonDown="PresetList_PreviewMouseLeftButtonDown"
+                             MouseMove="PresetList_MouseMove">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="6">
+                                                <ContentPresenter/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#2A2A2A"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource BgInput}" 
+                                        CornerRadius="6" 
+                                        Padding="10"
+                                        Cursor="Hand">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- İkon -->
+                                        <Border Grid.Column="0" 
+                                                Background="{Binding Color}" 
+                                                CornerRadius="6" 
+                                                Width="35" 
+                                                Height="35"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Icon}" 
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="18" 
+                                                       Foreground="White"
+                                                       HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+
+                                        <!-- Bilgiler -->
+                                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" 
+                                                       Foreground="White" 
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"/>
+                                            <TextBlock Text="{Binding Description}" 
+                                                       Foreground="#888" 
+                                                       FontSize="10"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
         </Grid>
     </Border>
 </Window>
