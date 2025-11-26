@@ -14,6 +14,8 @@ public class DeckItem : ObservableObject
     private int _column;
     private string? _iconPath;
     private bool _isSelected;
+    private string _behaviorType = "Push"; // "Push" veya "Toggle"
+    private bool _isActive; // Toggle butonlar için runtime state (JSON'a kaydedilmez)
 
     public string Id
     {
@@ -25,6 +27,18 @@ public class DeckItem : ObservableObject
     {
         get => _isSelected;
         set { _isSelected = value; OnPropertyChanged(); }
+    }
+    
+    public string BehaviorType
+    {
+        get => _behaviorType;
+        set { _behaviorType = value; OnPropertyChanged(); }
+    }
+    
+    public bool IsActive
+    {
+        get => _isActive;
+        set { _isActive = value; OnPropertyChanged(); }
     }
 
     public string Title

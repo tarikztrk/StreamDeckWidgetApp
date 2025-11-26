@@ -181,12 +181,19 @@ public class MainViewModel : ObservableObject
     {
         if (parameter is DeckItem item)
         {
-            if (IsEditorOpen) // Editör açıksa SEÇ
+            if (IsEditorOpen) // Editör açıksa SEÇ (Toggle durumu değişmez!)
             {
                 SelectedDeckItem = item;
             }
             else // Kapalıysa ÇALIŞTIR
             {
+                // Toggle buton ise durumu değiştir
+                if (item.BehaviorType == "Toggle")
+                {
+                    item.IsActive = !item.IsActive;
+                }
+                
+                // Aksiyonu çalıştır
                 _actionService.ExecuteItem(item);
             }
         }
