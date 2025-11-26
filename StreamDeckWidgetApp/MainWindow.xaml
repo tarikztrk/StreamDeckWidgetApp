@@ -97,40 +97,44 @@
                                                             </Style>
                                                         </Border.Style>
                                                         <Grid x:Name="ContentGrid">
+                                                            <!-- Hover overlay: beyaz ile hafif parlaklık efekti verir -->
+                                                            <Rectangle x:Name="HoverOverlay" Fill="White" Opacity="0"
+                                                                 IsHitTestVisible="False" RadiusX="8" RadiusY="8"/>
+
                                                             <Image Source="{Binding IconPath, Converter={StaticResource PathToImage}}" 
-                                                                   Stretch="UniformToFill"
-                                                                   Opacity="0.8"/>
+                                                                Stretch="UniformToFill"
+                                                                Opacity="0.8"/>
                                                             
                                                             <TextBlock Text="{Binding Title}" 
-                                                                       Foreground="White" 
-                                                                       FontWeight="Bold"
-                                                                       HorizontalAlignment="Center" 
-                                                                       VerticalAlignment="Center"
-                                                                       TextWrapping="Wrap" 
-                                                                       TextAlignment="Center"/>
+                                                                 Foreground="White" 
+                                                                 FontWeight="Bold"
+                                                                 HorizontalAlignment="Center" 
+                                                                 VerticalAlignment="Center"
+                                                                 TextWrapping="Wrap" 
+                                                                 TextAlignment="Center"/>
                                                         </Grid>
                                                     </Border>
                                                     
                                                     <ControlTemplate.Triggers>
-                                                        <!-- Hover State: Parlaklık artışı -->
+                                                        <!-- Hover State: HoverOverlay opacity ile parlaklık simülasyonu -->
                                                         <Trigger Property="IsMouseOver" Value="True">
                                                             <Trigger.EnterActions>
                                                                 <BeginStoryboard>
                                                                     <Storyboard>
-                                                                        <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                                                                        <DoubleAnimation Storyboard.TargetName="HoverOverlay"
                                                                                        Storyboard.TargetProperty="Opacity"
-                                                                                       To="1.15"
-                                                                                       Duration="0:0:0.1"/>
+                                                                                       To="0.12"
+                                                                                       Duration="0:0:0.08"/>
                                                                     </Storyboard>
                                                                 </BeginStoryboard>
                                                             </Trigger.EnterActions>
                                                             <Trigger.ExitActions>
                                                                 <BeginStoryboard>
                                                                     <Storyboard>
-                                                                        <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                                                                        <DoubleAnimation Storyboard.TargetName="HoverOverlay"
                                                                                        Storyboard.TargetProperty="Opacity"
-                                                                                       To="1.0"
-                                                                                       Duration="0:0:0.1"/>
+                                                                                       To="0.0"
+                                                                                       Duration="0:0:0.12"/>
                                                                     </Storyboard>
                                                                 </BeginStoryboard>
                                                             </Trigger.ExitActions>
@@ -185,9 +189,9 @@
                                                                                        Storyboard.TargetProperty="ScaleY"
                                                                                        To="0.95"
                                                                                        Duration="0:0:0.1"/>
-                                                                        <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                                                                        <DoubleAnimation Storyboard.TargetName="HoverOverlay"
                                                                                        Storyboard.TargetProperty="Opacity"
-                                                                                       To="1.3"
+                                                                                       To="0.25"
                                                                                        Duration="0:0:0.1"/>
                                                                     </Storyboard>
                                                                 </BeginStoryboard>
@@ -203,9 +207,9 @@
                                                                                        Storyboard.TargetProperty="ScaleY"
                                                                                        To="1.0"
                                                                                        Duration="0:0:0.1"/>
-                                                                        <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                                                                        <DoubleAnimation Storyboard.TargetName="HoverOverlay"
                                                                                        Storyboard.TargetProperty="Opacity"
-                                                                                       To="1.0"
+                                                                                       To="0.0"
                                                                                        Duration="0:0:0.1"/>
                                                                     </Storyboard>
                                                                 </BeginStoryboard>
