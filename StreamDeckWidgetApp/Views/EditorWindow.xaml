@@ -197,23 +197,17 @@
                             <StackPanel>
                                 <TextBlock Text="Grid Düzeni" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
                                 
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="10"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="SATIR" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
-                                        <TextBox Text="{Binding Rows, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
-                                    </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="SATIR" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
+                                    <Slider Minimum="1" Maximum="8" Value="{Binding Rows, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                    <TextBlock Text="{Binding Rows}" Foreground="#AAA" HorizontalAlignment="Center" Margin="0,6,0,8"/>
 
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="SÜTUN" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
-                                        <TextBox Text="{Binding Columns, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
-                                    </StackPanel>
-                                </Grid>
+                                    <TextBlock Text="SÜTUN" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
+                                    <Slider Minimum="1" Maximum="10" Value="{Binding Columns, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                    <TextBlock Text="{Binding Columns}" Foreground="#AAA" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+
+                                    <TextBlock Text="Not: Maksimum 8 satır ve 10 sütun kullanılabilir." FontSize="11" Foreground="#777" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
 

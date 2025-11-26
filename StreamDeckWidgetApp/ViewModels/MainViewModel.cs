@@ -12,6 +12,10 @@ namespace StreamDeckWidgetApp.ViewModels;
 
 public class MainViewModel : ObservableObject
 {
+        // Maksimum sınırlar
+        private const int MaxRows = 8;
+        private const int MaxColumns = 10;
+
     private readonly IActionService _actionService;
     private readonly IConfigService _configService;
     private readonly Func<EditorViewModel> _editorViewModelFactory;
@@ -51,9 +55,11 @@ public class MainViewModel : ObservableObject
         get => _currentProfile.Rows;
         set
         {
-            if (_currentProfile.Rows != value && value > 0)
+            // Clamp değeri 1..MaxRows aralığına getir
+            int newVal = Math.Clamp(value, 1, MaxRows);
+            if (_currentProfile.Rows != newVal)
             {
-                _currentProfile.Rows = value;
+                _currentProfile.Rows = newVal;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
             }
@@ -65,9 +71,11 @@ public class MainViewModel : ObservableObject
         get => _currentProfile.Columns;
         set
         {
-            if (_currentProfile.Columns != value && value > 0)
+            // Clamp değeri 1..MaxColumns aralığına getir
+            int newVal = Math.Clamp(value, 1, MaxColumns);
+            if (_currentProfile.Columns != newVal)
             {
-                _currentProfile.Columns = value;
+                _currentProfile.Columns = newVal;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
             }
