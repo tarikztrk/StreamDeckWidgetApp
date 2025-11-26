@@ -172,29 +172,9 @@
                            VerticalAlignment="Center" Margin="20,0,0,0" FontSize="12" IsHitTestVisible="False"/>
                 
                 <!-- Kapatma Butonu -->
-                <Button Content="✕" HorizontalAlignment="Right" Width="40" Height="40"
-                        Background="Transparent" Foreground="#AAA" BorderThickness="0"
-                        Command="{Binding CloseCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#C42B1C"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+                <Button Command="{Binding CloseCommand}" Content="X"  HorizontalAlignment="Right"
+                            Width="40" Height="40"
+                            Background="Transparent" Foreground="#888" BorderThickness="0" Cursor="Hand"/>
             </Grid>
 
             <!-- 2. SOL PANEL (GENEL AYARLAR) -->
