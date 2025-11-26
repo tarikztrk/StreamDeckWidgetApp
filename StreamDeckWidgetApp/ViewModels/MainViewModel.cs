@@ -13,6 +13,8 @@ public class MainViewModel : ObservableObject
 {
     private readonly IActionService _actionService;
     private readonly IConfigService _configService;
+    private readonly Func<EditorViewModel> _editorViewModelFactory;
+    private readonly Func<EditorWindow> _editorWindowFactory;
     private Profile _currentProfile;
 
     // --- State Properties ---
@@ -92,10 +94,16 @@ public class MainViewModel : ObservableObject
     public ICommand OpenEditorCommand { get; }
     public ICommand SaveCommand { get; }
 
-    public MainViewModel(IActionService actionService, IConfigService configService)
+    public MainViewModel(
+        IActionService actionService, 
+        IConfigService configService,
+        Func<EditorViewModel> editorViewModelFactory,
+        Func<EditorWindow> editorWindowFactory)
     {
         _actionService = actionService;
         _configService = configService;
+        _editorViewModelFactory = editorViewModelFactory;
+        _editorWindowFactory = editorWindowFactory;
         DeckItems = new ObservableCollection<DeckItem>();
         
         LoadData();
@@ -176,23 +184,32 @@ public class MainViewModel : ObservableObject
             return;
         }
 
-        // Yeni pencere oluştur ve BU ViewModel'i ona da ver (Sharing Data)
-        _editorWindow = new EditorWindow();
-        _editorWindow.DataContext = this; // <--- EN ÖNEMLİ KISIM: Veri Paylaşımı
+        // DI ile EditorWindow ve EditorViewModel oluştur
+        _editorWindow = _editorWindowFactory();
+        var editorViewModel = _editorViewModelFactory();
+        
+        // EditorViewModel'e window referansını ver
+        editorViewModel.SetWindow(_editorWindow);
+        _editorWindow.DataContext = editorViewModel;
         
         // Pencere kapanınca referansı temizle
-        _editorWindow.Closed += (s, e) => 
-        { 
-            _editorWindow = null; 
-            SelectedDeckItem = null; // Editör kapanınca seçimi kaldır
-            OnPropertyChanged(nameof(IsEditorOpen)); // UI güncellensin
-        };
+        _editorWindow.Closed += (s, e) => OnEditorClosed();
 
         _editorWindow.Show();
         OnPropertyChanged(nameof(IsEditorOpen));
     }
 
-    private void SaveChanges()
+    /// <summary>
+    /// Called by EditorViewModel when editor window closes
+    /// </summary>
+    public void OnEditorClosed()
+    {
+        _editorWindow = null;
+        SelectedDeckItem = null;
+        OnPropertyChanged(nameof(IsEditorOpen));
+    }
+
+    public void SaveChanges()
     {
         _currentProfile.Items = DeckItems.ToList();
         _configService.SaveProfile(_currentProfile);

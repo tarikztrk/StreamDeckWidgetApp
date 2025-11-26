@@ -3,13 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using StreamDeckWidgetApp.Abstractions;
 using StreamDeckWidgetApp.Services;
 using StreamDeckWidgetApp.ViewModels;
+using StreamDeckWidgetApp.Views;
 
 namespace StreamDeckWidgetApp;
 
 public partial class App : Application
 {
-    public new static App Current => (App)Application.Current;
-    public IServiceProvider Services { get; }
+    public static IServiceProvider Services { get; private set; } = null!;
 
     public App()
     {
@@ -20,15 +20,24 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
 
-        // Servisleri Kayýt Et
+        // Servis KatmanÄ± KayÄ±tlarÄ±
         services.AddSingleton<IActionService, ActionService>();
-        services.AddSingleton<IConfigService, JsonConfigService>(); // JSON Konfigürasyon Servisi
+        services.AddSingleton<IConfigService, JsonConfigService>();
 
-        // ViewModel'leri Kayýt Et
+        // ViewModel'leri KayÄ±t Et
         services.AddTransient<MainViewModel>();
+        services.AddTransient<EditorViewModel>();
 
-        // View'larý Kayýt Et
+        // View'larÄ± KayÄ±t Et
         services.AddTransient<MainWindow>();
+        services.AddTransient<EditorWindow>();
+
+        // Func factories for MainViewModel
+        services.AddSingleton<Func<EditorViewModel>>(sp => () => sp.GetRequiredService<EditorViewModel>());
+        services.AddSingleton<Func<EditorWindow>>(sp => () => sp.GetRequiredService<EditorWindow>());
+
+        // App singleton
+        services.AddSingleton<Application>(sp => (App)Application.Current);
 
         return services.BuildServiceProvider();
     }
@@ -37,7 +46,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        // MainWindow'u DI Container üzerinden çözümlüyoruz
+        // MainWindow'u DI Container Ã¼zerinden Ã§Ã¶zÃ¼mlÃ¼yoruz
         var mainWindow = Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
     }
