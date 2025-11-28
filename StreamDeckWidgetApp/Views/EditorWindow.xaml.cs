@@ -102,4 +102,47 @@ public partial class EditorWindow : Window
         }
         e.Handled = true;
     }
+    
+    /// <summary>
+    /// Hızlı ikon butonlarına tıklama
+    /// </summary>
+    private void QuickIcon_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.Button btn && 
+            btn.Tag is string iconCode &&
+            DataContext is EditorViewModel vm &&
+            vm.SelectedDeckItem is DeckItem item)
+        {
+            item.Icon = iconCode;
+            item.IconPath = null; // Dosya ikonunu temizle
+        }
+    }
+    
+    /// <summary>
+    /// İkon önizlemesine resim dosyası sürükleme
+    /// </summary>
+    private void IconPreview_Drop(object sender, DragEventArgs e)
+    {
+        if (DataContext is not EditorViewModel vm) return;
+        if (vm.SelectedDeckItem is not DeckItem item) return;
+        
+        if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (files?.Length > 0)
+            {
+                var file = files[0];
+                var ext = System.IO.Path.GetExtension(file).ToLower();
+                
+                // Resim dosyası mı kontrol et
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".ico" || ext == ".bmp")
+                {
+                    item.IconPath = file;
+                    item.Icon = null; // Segoe MDL2 ikonunu temizle
+                }
+            }
+        }
+        
+        e.Handled = true;
+    }
 }

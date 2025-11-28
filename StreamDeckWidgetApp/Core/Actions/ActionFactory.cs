@@ -9,13 +9,15 @@ public class ActionFactory
 
     public ActionFactory()
     {
-        // Mevcut t�m aksiyonlar� listeye ekliyoruz
+        // Mevcut tüm aksiyonları listeye ekliyoruz
         _runners = new Dictionary<string, IActionRunner>(StringComparer.OrdinalIgnoreCase);
 
         Register(new ExecuteAppAction());
         Register(new WebsiteAction());
         Register(new HotkeyAction());
-        
+        Register(new MediaControlAction());
+        Register(new AudioControlAction());
+        Register(new TextTypeAction());
     }
 
     private void Register(IActionRunner runner)
@@ -29,6 +31,14 @@ public class ActionFactory
         {
             return runner;
         }
-        return null; // Tan�ms�z aksiyon
+        return null; // Tanımsız aksiyon
+    }
+    
+    /// <summary>
+    /// Tüm kayıtlı action tiplerini döndürür
+    /// </summary>
+    public IEnumerable<string> GetAllActionTypes()
+    {
+        return _runners.Keys;
     }
 }

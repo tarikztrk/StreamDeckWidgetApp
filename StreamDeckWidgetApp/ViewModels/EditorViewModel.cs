@@ -74,6 +74,22 @@ public class EditorViewModel : ObservableObject
     public List<string> ActionTypes => _mainViewModel.ActionTypes;
     public ObservableCollection<DeckItem> DeckItems => _mainViewModel.DeckItems;
     
+    // --- Profile Properties (Proxy from MainViewModel) ---
+    public ObservableCollection<Profile> Profiles => _mainViewModel.Profiles;
+    public Profile CurrentProfile => _mainViewModel.CurrentProfile;
+    
+    public string CurrentProfileName
+    {
+        get => _mainViewModel.CurrentProfileName;
+        set => _mainViewModel.CurrentProfileName = value;
+    }
+    
+    // Profile Commands
+    public ICommand SwitchProfileCommand => _mainViewModel.SwitchProfileCommand;
+    public ICommand CreateProfileCommand => _mainViewModel.CreateProfileCommand;
+    public ICommand DeleteProfileCommand => _mainViewModel.DeleteProfileCommand;
+    public ICommand DuplicateProfileCommand => _mainViewModel.DuplicateProfileCommand;
+    
     // --- Library Properties (Proxy from MainViewModel) ---
     public ObservableCollection<PresetModel> LibraryItems => _mainViewModel.LibraryItems;
     
@@ -90,6 +106,71 @@ public class EditorViewModel : ObservableObject
     }
     
     public List<string> LibraryCategories => _mainViewModel.LibraryCategories;
+    
+    // ================================================================
+    // ACTION-SPECIFIC COMMAND OPTIONS
+    // ================================================================
+    
+    /// <summary>
+    /// MediaControl için kullanılabilir komutlar
+    /// </summary>
+    public List<ActionCommandOption> MediaControlCommands { get; } = new()
+    {
+        new("PLAY_PAUSE", "⏯️ Oynat / Duraklat"),
+        new("NEXT_TRACK", "⏭️ Sonraki Parça"),
+        new("PREV_TRACK", "⏮️ Önceki Parça"),
+        new("STOP", "⏹️ Durdur")
+    };
+    
+    /// <summary>
+    /// AudioControl için kullanılabilir komutlar
+    /// </summary>
+    public List<ActionCommandOption> AudioControlCommands { get; } = new()
+    {
+        new("MUTE", "🔇 Sesi Kapat/Aç"),
+        new("VOL_UP", "🔊 Ses Artır (+5)"),
+        new("VOL_DOWN", "🔉 Ses Azalt (-5)")
+    };
+    
+    /// <summary>
+    /// Hotkey için hazır komutlar
+    /// </summary>
+    public List<ActionCommandOption> HotkeyPresetCommands { get; } = new()
+    {
+        // Temel Düzenleme
+        new("COPY", "📋 Kopyala (Ctrl+C)"),
+        new("PASTE", "📋 Yapıştır (Ctrl+V)"),
+        new("CUT", "✂️ Kes (Ctrl+X)"),
+        new("UNDO", "↩️ Geri Al (Ctrl+Z)"),
+        new("REDO", "↪️ Yinele (Ctrl+Y)"),
+        new("SELECT_ALL", "☑️ Tümünü Seç (Ctrl+A)"),
+        
+        // Dosya İşlemleri
+        new("SAVE", "💾 Kaydet (Ctrl+S)"),
+        new("NEW", "📄 Yeni (Ctrl+N)"),
+        new("OPEN", "📂 Aç (Ctrl+O)"),
+        new("PRINT", "🖨️ Yazdır (Ctrl+P)"),
+        new("FIND", "🔍 Bul (Ctrl+F)"),
+        new("CLOSE", "❌ Sekmeyi Kapat (Ctrl+W)"),
+        new("REFRESH", "🔄 Yenile (F5)"),
+        
+        // Windows Kısayolları
+        new("SCREENSHOT", "📸 Ekran Alıntısı (Win+Shift+S)"),
+        new("TASK_MANAGER", "📊 Görev Yöneticisi (Ctrl+Shift+Esc)"),
+        new("WIN_D", "🖥️ Masaüstü Göster (Win+D)"),
+        new("WIN_E", "📁 Dosya Gezgini (Win+E)"),
+        new("WIN_L", "🔒 Kilitle (Win+L)"),
+        new("ALT_TAB", "🔄 Pencere Değiştir (Alt+Tab)"),
+        
+        // Ses/Medya
+        new("MUTE", "🔇 Sesi Kapat"),
+        new("VOL_UP", "🔊 Ses Artır"),
+        new("VOL_DOWN", "🔉 Ses Azalt"),
+        new("MEDIA_PLAY", "⏯️ Medya Oynat/Durdur"),
+        
+        // Özel (Kullanıcı girecek)
+        new("", "⌨️ Özel Kombinasyon (elle girin)")
+    };
 
     public EditorViewModel(MainViewModel mainViewModel)
     {
@@ -135,6 +216,13 @@ public class EditorViewModel : ObservableObject
             {
                 OnPropertyChanged(nameof(SelectedButtonSize));
                 TriggerDebouncedSave();
+            }
+            else if (e.PropertyName == nameof(MainViewModel.CurrentProfile) ||
+                     e.PropertyName == nameof(MainViewModel.CurrentProfileName))
+            {
+                OnPropertyChanged(nameof(CurrentProfile));
+                OnPropertyChanged(nameof(CurrentProfileName));
+                OnPropertyChanged(nameof(Profiles));
             }
         };
         

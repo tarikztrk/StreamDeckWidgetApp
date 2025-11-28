@@ -17,7 +17,9 @@ public static class PresetService
             "Sistem Kontrolü",
             "Windows Araçları",
             "Web & Yayın",
-            "Medya & Kısayollar"
+            "Medya & Ses",
+            "Klavye Kısayolları",
+            "Metin Yazma"
         };
     }
     
@@ -69,11 +71,11 @@ public static class PresetService
                 Id = "sys_lock",
                 Name = "Kilitle (Lock)",
                 Category = "Sistem Kontrolü",
-                ActionType = "Execute",
-                Command = "rundll32.exe user32.dll,LockWorkStation",
+                ActionType = "Hotkey",
+                Command = "WIN_L",
                 Color = "#FBC02D", // Sarı
                 Icon = "\uE72E", // Segoe MDL2: Lock
-                Description = "Windows'u kilitler"
+                Description = "Windows'u kilitler (Win+L)"
             },
             new PresetModel
             {
@@ -129,11 +131,11 @@ public static class PresetService
                 Id = "app_taskmgr",
                 Name = "Görev Yöneticisi",
                 Category = "Windows Araçları",
-                ActionType = "Execute",
-                Command = "taskmgr.exe",
+                ActionType = "Hotkey",
+                Command = "TASK_MANAGER",
                 Color = "#43A047", // Yeşil
                 Icon = "\uE7EE", // Segoe MDL2: System
-                Description = "Windows Görev Yöneticisi"
+                Description = "Ctrl+Shift+Esc kısayolu"
             },
             new PresetModel
             {
@@ -151,11 +153,33 @@ public static class PresetService
                 Id = "app_explorer",
                 Name = "Dosya Gezgini",
                 Category = "Windows Araçları",
-                ActionType = "Execute",
-                Command = "explorer.exe",
+                ActionType = "Hotkey",
+                Command = "WIN_E",
                 Color = "#FDD835", // Sarı
                 Icon = "\uE8B7", // Segoe MDL2: Folder
-                Description = "Windows Dosya Gezgini"
+                Description = "Win+E kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "app_run",
+                Name = "Çalıştır (Run)",
+                Category = "Windows Araçları",
+                ActionType = "Hotkey",
+                Command = "WIN+R",
+                Color = "#455A64", // Slate
+                Icon = "\uE756", // Segoe MDL2: CommandPrompt
+                Description = "Win+R Çalıştır penceresi"
+            },
+            new PresetModel
+            {
+                Id = "win_desktop",
+                Name = "Masaüstü Göster",
+                Category = "Windows Araçları",
+                ActionType = "Hotkey",
+                Command = "WIN_D",
+                Color = "#00796B", // Teal
+                Icon = "\uE8FC", // Segoe MDL2: Desktop
+                Description = "Tüm pencereleri simge durumuna küçült"
             }
         });
         
@@ -230,26 +254,59 @@ public static class PresetService
             }
         });
         
-        // D. Kategori: Medya & Kısayollar
+        // D. Kategori: Medya & Ses
         presets.AddRange(new[]
         {
             new PresetModel
             {
-                Id = "key_playpause",
+                Id = "media_playpause",
                 Name = "Oynat / Durdur",
-                Category = "Medya & Kısayollar",
-                ActionType = "Hotkey",
-                Command = "MEDIA_PLAY_PAUSE",
+                Category = "Medya & Ses",
+                ActionType = "MediaControl",
+                Command = "PLAY_PAUSE",
                 Color = "#43A047", // Yeşil
                 Icon = "\uE768", // Segoe MDL2: Play
                 Description = "Medya oynat/duraklat"
             },
             new PresetModel
             {
-                Id = "key_mute",
+                Id = "media_next",
+                Name = "Sonraki Parça",
+                Category = "Medya & Ses",
+                ActionType = "MediaControl",
+                Command = "NEXT_TRACK",
+                Color = "#26A69A", // Teal
+                Icon = "\uE893", // Segoe MDL2: Next
+                Description = "Sonraki medya parçası"
+            },
+            new PresetModel
+            {
+                Id = "media_prev",
+                Name = "Önceki Parça",
+                Category = "Medya & Ses",
+                ActionType = "MediaControl",
+                Command = "PREV_TRACK",
+                Color = "#26A69A", // Teal
+                Icon = "\uE892", // Segoe MDL2: Previous
+                Description = "Önceki medya parçası"
+            },
+            new PresetModel
+            {
+                Id = "media_stop",
+                Name = "Durdur",
+                Category = "Medya & Ses",
+                ActionType = "MediaControl",
+                Command = "STOP",
+                Color = "#EF5350", // Kırmızı
+                Icon = "\uE71A", // Segoe MDL2: Stop
+                Description = "Medyayı durdur"
+            },
+            new PresetModel
+            {
+                Id = "audio_mute",
                 Name = "Sesi Kapat",
-                Category = "Medya & Kısayollar",
-                ActionType = "Hotkey",
+                Category = "Medya & Ses",
+                ActionType = "AudioControl",
                 Command = "MUTE",
                 Color = "#D32F2F", // Kırmızı
                 Icon = "\uE74F", // Segoe MDL2: Mute
@@ -257,31 +314,37 @@ public static class PresetService
             },
             new PresetModel
             {
-                Id = "key_volup",
-                Name = "Ses Artır",
-                Category = "Medya & Kısayollar",
-                ActionType = "Hotkey",
+                Id = "audio_volup",
+                Name = "Ses Artır (+5)",
+                Category = "Medya & Ses",
+                ActionType = "AudioControl",
                 Command = "VOL_UP",
                 Color = "#1976D2", // Mavi
                 Icon = "\uE995", // Segoe MDL2: Volume
-                Description = "Sistem sesini artır"
+                Description = "Sistem sesini 5 adım artır"
             },
             new PresetModel
             {
-                Id = "key_voldown",
-                Name = "Ses Azalt",
-                Category = "Medya & Kısayollar",
-                ActionType = "Hotkey",
+                Id = "audio_voldown",
+                Name = "Ses Azalt (-5)",
+                Category = "Medya & Ses",
+                ActionType = "AudioControl",
                 Command = "VOL_DOWN",
                 Color = "#0288D1", // Açık Mavi
                 Icon = "\uE992", // Segoe MDL2: Volume down
-                Description = "Sistem sesini azalt"
-            },
+                Description = "Sistem sesini 5 adım azalt"
+            }
+        });
+        
+        // E. Kategori: Klavye Kısayolları
+        presets.AddRange(new[]
+        {
+            // Temel düzenleme
             new PresetModel
             {
                 Id = "key_copy",
                 Name = "Kopyala",
-                Category = "Medya & Kısayollar",
+                Category = "Klavye Kısayolları",
                 ActionType = "Hotkey",
                 Command = "COPY",
                 Color = "#5E35B1", // Mor
@@ -292,7 +355,7 @@ public static class PresetService
             {
                 Id = "key_paste",
                 Name = "Yapıştır",
-                Category = "Medya & Kısayollar",
+                Category = "Klavye Kısayolları",
                 ActionType = "Hotkey",
                 Command = "PASTE",
                 Color = "#7B1FA2", // Koyu Mor
@@ -301,14 +364,221 @@ public static class PresetService
             },
             new PresetModel
             {
+                Id = "key_cut",
+                Name = "Kes",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "CUT",
+                Color = "#9C27B0", // Mor
+                Icon = "\uE8C6", // Segoe MDL2: Cut
+                Description = "Ctrl+X kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_undo",
+                Name = "Geri Al",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "UNDO",
+                Color = "#FF7043", // Turuncu
+                Icon = "\uE7A7", // Segoe MDL2: Undo
+                Description = "Ctrl+Z kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_redo",
+                Name = "Yinele",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "REDO",
+                Color = "#FF5722", // Turuncu
+                Icon = "\uE7A6", // Segoe MDL2: Redo
+                Description = "Ctrl+Y kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_selectall",
+                Name = "Tümünü Seç",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "SELECT_ALL",
+                Color = "#1E88E5", // Mavi
+                Icon = "\uE8B3", // Segoe MDL2: SelectAll
+                Description = "Ctrl+A kısayolu"
+            },
+            
+            // Dosya işlemleri
+            new PresetModel
+            {
+                Id = "key_save",
+                Name = "Kaydet",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "SAVE",
+                Color = "#43A047", // Yeşil
+                Icon = "\uE74E", // Segoe MDL2: Save
+                Description = "Ctrl+S kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_new",
+                Name = "Yeni",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "NEW",
+                Color = "#29B6F6", // Açık mavi
+                Icon = "\uE8A5", // Segoe MDL2: NewWindow
+                Description = "Ctrl+N kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_open",
+                Name = "Aç",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "OPEN",
+                Color = "#FFA726", // Turuncu
+                Icon = "\uE8B7", // Segoe MDL2: OpenFile
+                Description = "Ctrl+O kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_print",
+                Name = "Yazdır",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "PRINT",
+                Color = "#78909C", // Gri mavi
+                Icon = "\uE749", // Segoe MDL2: Print
+                Description = "Ctrl+P kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_find",
+                Name = "Bul",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "FIND",
+                Color = "#26A69A", // Teal
+                Icon = "\uE721", // Segoe MDL2: Search
+                Description = "Ctrl+F kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_refresh",
+                Name = "Yenile",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "REFRESH",
+                Color = "#42A5F5", // Mavi
+                Icon = "\uE72C", // Segoe MDL2: Refresh
+                Description = "F5 tuşu"
+            },
+            
+            // Ekran ve pencere
+            new PresetModel
+            {
                 Id = "key_screenshot",
                 Name = "Ekran Alıntısı",
-                Category = "Medya & Kısayollar",
+                Category = "Klavye Kısayolları",
                 ActionType = "Hotkey",
                 Command = "SCREENSHOT",
                 Color = "#00897B", // Teal
                 Icon = "\uE7B7", // Segoe MDL2: Camera
                 Description = "Win+Shift+S (Snipping Tool)"
+            },
+            new PresetModel
+            {
+                Id = "key_alttab",
+                Name = "Pencere Değiştir",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "ALT_TAB",
+                Color = "#546E7A", // Slate
+                Icon = "\uE737", // Segoe MDL2: Switch
+                Description = "Alt+Tab kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_close",
+                Name = "Sekmeyi Kapat",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "CLOSE",
+                Color = "#E53935", // Kırmızı
+                Icon = "\uE8BB", // Segoe MDL2: Cancel
+                Description = "Ctrl+W kısayolu"
+            },
+            new PresetModel
+            {
+                Id = "key_altf4",
+                Name = "Pencereyi Kapat",
+                Category = "Klavye Kısayolları",
+                ActionType = "Hotkey",
+                Command = "ALT+F4",
+                Color = "#C62828", // Koyu kırmızı
+                Icon = "\uE8BB", // Segoe MDL2: Cancel
+                Description = "Alt+F4 ile pencereyi kapat"
+            }
+        });
+        
+        // F. Kategori: Metin Yazma
+        presets.AddRange(new[]
+        {
+            new PresetModel
+            {
+                Id = "text_email",
+                Name = "E-posta Adresi",
+                Category = "Metin Yazma",
+                ActionType = "TextType",
+                Command = "ornek@email.com",
+                Color = "#1565C0", // Mavi
+                Icon = "\uE715", // Segoe MDL2: Mail
+                Description = "E-posta adresinizi hızlıca yazın"
+            },
+            new PresetModel
+            {
+                Id = "text_phone",
+                Name = "Telefon No",
+                Category = "Metin Yazma",
+                ActionType = "TextType",
+                Command = "+90 5XX XXX XX XX",
+                Color = "#2E7D32", // Yeşil
+                Icon = "\uE717", // Segoe MDL2: Phone
+                Description = "Telefon numaranızı hızlıca yazın"
+            },
+            new PresetModel
+            {
+                Id = "text_address",
+                Name = "Adres",
+                Category = "Metin Yazma",
+                ActionType = "TextType",
+                Command = "İstanbul, Türkiye",
+                Color = "#6D4C41", // Kahverengi
+                Icon = "\uE80F", // Segoe MDL2: Map
+                Description = "Adresinizi hızlıca yazın"
+            },
+            new PresetModel
+            {
+                Id = "text_signature",
+                Name = "İmza",
+                Category = "Metin Yazma",
+                ActionType = "TextType",
+                Command = "Saygılarımla,\nAd Soyad",
+                Color = "#5C6BC0", // İndigo
+                Icon = "\uE8AC", // Segoe MDL2: Edit
+                Description = "E-posta imzanızı hızlıca yazın"
+            },
+            new PresetModel
+            {
+                Id = "text_greeting",
+                Name = "Selamlaşma",
+                Category = "Metin Yazma",
+                ActionType = "TextType",
+                Command = "Merhaba,\n\nUmarım iyisinizdir.",
+                Color = "#7986CB", // İndigo açık
+                Icon = "\uE76E", // Segoe MDL2: People
+                Description = "E-posta açılış metni"
             }
         });
         

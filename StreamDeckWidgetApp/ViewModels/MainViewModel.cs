@@ -105,7 +105,15 @@ public class MainViewModel : ObservableObject
     }
 
     // ComboBox için Action Tipleri
-    public List<string> ActionTypes { get; } = new() { "Execute", "Hotkey", "Website" };
+    public List<string> ActionTypes { get; } = new() 
+    { 
+        "Execute",      // Uygulama/Program Çalıştır
+        "Hotkey",       // Klavye Kısayolu
+        "Website",      // Web Sitesi Aç
+        "MediaControl", // Medya Kontrol (Play/Pause/Next/Prev)
+        "AudioControl", // Ses Kontrol (Mute/Vol+/Vol-)
+        "TextType"      // Metin Yaz
+    };
 
     public ObservableCollection<DeckItem> DeckItems { get; set; }
     
@@ -145,11 +153,39 @@ public class MainViewModel : ObservableObject
     
     public List<string> LibraryCategories { get; } = new() { "Tümü" };
 
+    // --- Profile Management ---
+    private ObservableCollection<Profile> _profiles = new();
+    public ObservableCollection<Profile> Profiles
+    {
+        get => _profiles;
+        set => SetField(ref _profiles, value);
+    }
+    
+    public Profile CurrentProfile => _currentProfile;
+    
+    public string CurrentProfileName
+    {
+        get => _currentProfile?.Name ?? "Profil";
+        set
+        {
+            if (_currentProfile != null && _currentProfile.Name != value)
+            {
+                _configService.RenameProfile(_currentProfile.Id, value);
+                _currentProfile.Name = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     // --- Commands ---
     public ICommand ItemClickCommand { get; }
     public ICommand CloseAppCommand { get; }
     public ICommand OpenEditorCommand { get; }
     public ICommand SaveCommand { get; }
+    public ICommand SwitchProfileCommand { get; }
+    public ICommand CreateProfileCommand { get; }
+    public ICommand DeleteProfileCommand { get; }
+    public ICommand DuplicateProfileCommand { get; }
 
     public MainViewModel(
         IActionService actionService, 
@@ -182,6 +218,12 @@ public class MainViewModel : ObservableObject
         // Değişiklikleri Kaydet
         SaveCommand = new RelayCommand(_ => SaveChanges());
         
+        // Profil Komutları
+        SwitchProfileCommand = new RelayCommand(profileId => SwitchProfile(profileId as string));
+        CreateProfileCommand = new RelayCommand(_ => CreateNewProfile());
+        DeleteProfileCommand = new RelayCommand(_ => DeleteCurrentProfile());
+        DuplicateProfileCommand = new RelayCommand(_ => DuplicateCurrentProfile());
+        
         // Kütüphaneyi ilk yükle
         LoadLibrary();
     }
@@ -193,8 +235,117 @@ public class MainViewModel : ObservableObject
         // Eğer eski profillerde boyut yoksa varsayılanı ata
         if (_currentProfile.ButtonSize == 0) _currentProfile.ButtonSize = 85;
         
+        // Profil listesini yükle
+        LoadProfiles();
+        
         // Veri yüklendikten sonra Grid'i olması gereken sayıya tamamla
         RefreshGrid();
+    }
+    
+    private void LoadProfiles()
+    {
+        Profiles.Clear();
+        foreach (var profile in _configService.GetAllProfiles())
+        {
+            Profiles.Add(profile);
+        }
+    }
+    
+    private void SwitchProfile(string? profileId)
+    {
+        if (string.IsNullOrEmpty(profileId) || profileId == _currentProfile.Id) return;
+        
+        // Mevcut profili kaydet
+        SaveChanges();
+        
+        // Yeni profile geç
+        _configService.SetActiveProfile(profileId);
+        _currentProfile = _configService.LoadProfile();
+        
+        // UI'ı güncelle
+        OnPropertyChanged(nameof(Rows));
+        OnPropertyChanged(nameof(Columns));
+        OnPropertyChanged(nameof(SelectedButtonSize));
+        OnPropertyChanged(nameof(CurrentProfileName));
+        OnPropertyChanged(nameof(CurrentProfile));
+        
+        RefreshGrid();
+        LoadProfiles();
+    }
+    
+    private void CreateNewProfile()
+    {
+        // Mevcut profili kaydet
+        SaveChanges();
+        
+        // Yeni profil oluştur
+        var newProfile = _configService.CreateProfile($"Profil {Profiles.Count + 1}");
+        
+        // Yeni profile geç
+        _configService.SetActiveProfile(newProfile.Id);
+        _currentProfile = newProfile;
+        
+        // UI'ı güncelle
+        OnPropertyChanged(nameof(Rows));
+        OnPropertyChanged(nameof(Columns));
+        OnPropertyChanged(nameof(SelectedButtonSize));
+        OnPropertyChanged(nameof(CurrentProfileName));
+        OnPropertyChanged(nameof(CurrentProfile));
+        
+        RefreshGrid();
+        LoadProfiles();
+    }
+    
+    private void DeleteCurrentProfile()
+    {
+        if (Profiles.Count <= 1)
+        {
+            MessageBox.Show("En az bir profil olmalı!", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        
+        var result = MessageBox.Show(
+            $"\"{_currentProfile.Name}\" profili silinecek. Emin misiniz?",
+            "Profil Sil",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+        
+        if (result != MessageBoxResult.Yes) return;
+        
+        var profileIdToDelete = _currentProfile.Id;
+        _configService.DeleteProfile(profileIdToDelete);
+        
+        // Yeni aktif profili yükle
+        _currentProfile = _configService.LoadProfile();
+        
+        // UI'ı güncelle
+        OnPropertyChanged(nameof(Rows));
+        OnPropertyChanged(nameof(Columns));
+        OnPropertyChanged(nameof(SelectedButtonSize));
+        OnPropertyChanged(nameof(CurrentProfileName));
+        OnPropertyChanged(nameof(CurrentProfile));
+        
+        RefreshGrid();
+        LoadProfiles();
+    }
+    
+    private void DuplicateCurrentProfile()
+    {
+        var duplicated = _configService.DuplicateProfile(_currentProfile.Id, $"{_currentProfile.Name} (Kopya)");
+        
+        // Kopyalanan profile geç
+        _configService.SetActiveProfile(duplicated.Id);
+        _currentProfile = duplicated;
+        
+        // UI'ı güncelle
+        OnPropertyChanged(nameof(Rows));
+        OnPropertyChanged(nameof(Columns));
+        OnPropertyChanged(nameof(SelectedButtonSize));
+        OnPropertyChanged(nameof(CurrentProfileName));
+        OnPropertyChanged(nameof(CurrentProfile));
+        
+        RefreshGrid();
+        LoadProfiles();
     }
 
     // Buton listesini yeni boyutlara g�re ayarlar
