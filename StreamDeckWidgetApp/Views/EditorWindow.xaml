@@ -71,6 +71,67 @@
             <Setter Property="Margin" Value="0,15,0,5"/>
         </Style>
 
+        <!-- DARK THEME SCROLLBAR STİLİ -->
+        <Style TargetType="ScrollBar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="Transparent">
+                            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                <Track.Thumb>
+                                    <Thumb Background="#444" BorderThickness="0">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="#555" CornerRadius="4" Margin="1"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Height" Value="8"/>
+                    <Setter Property="Width" Value="Auto"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- MODERN SLIDER STİLİ -->
+        <Style TargetType="Slider">
+            <Setter Property="Background" Value="#333"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentColor}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Border Height="4" Background="#333" CornerRadius="2" VerticalAlignment="Center"/>
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Width="16" Height="16" Background="{StaticResource AccentColor}" BorderThickness="0">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{StaticResource AccentColor}" Width="16" Height="16">
+                                                    <Ellipse.Effect>
+                                                        <DropShadowEffect ShadowDepth="1" BlurRadius="4" Opacity="0.3" Color="#000"/>
+                                                    </Ellipse.Effect>
+                                                </Ellipse>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- MODERN BUTTON STİLİ -->
         <Style TargetType="Button" x:Key="PrimaryBtn">
             <Setter Property="Background" Value="{StaticResource AccentColor}"/>
@@ -171,18 +232,25 @@
 
             <!-- 1. HEADER (SÜRÜKLENEBİLİR ALAN) -->
             <Grid Grid.ColumnSpan="3" Height="40" Background="Transparent">
-                <TextBlock Text="Stream Deck Kontrol Merkezi" Foreground="#888" 
+                <TextBlock Text="Stream Deck Kontrol Merkezi" Foreground="#666" 
                            VerticalAlignment="Center" Margin="20,0,0,0" FontSize="12" IsHitTestVisible="False"/>
                 
-                <!-- Kayıt Durumu Göstergesi -->
-                <TextBlock Text="{Binding SaveStatus}" Foreground="{StaticResource AccentColor}" 
-                           VerticalAlignment="Center" HorizontalAlignment="Center" 
-                           FontSize="11" FontWeight="SemiBold" IsHitTestVisible="False"/>
+                <!-- Kayıt Durumu Göstergesi - Daha subtle bir tasarım -->
+                <Border HorizontalAlignment="Center" VerticalAlignment="Center" 
+                        Background="#1A1A1A" CornerRadius="10" Padding="12,4">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="6" Height="6" Fill="#4CAF50" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding SaveStatus}" Foreground="#888" 
+                                   FontSize="10" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    </StackPanel>
+                </Border>
                 
                 <!-- Kapatma Butonu -->
-                <Button Command="{Binding CloseCommand}" Content="X" HorizontalAlignment="Right"
-                            Width="40" Height="40"
-                            Background="Transparent" Foreground="#888" BorderThickness="0" Cursor="Hand"/>
+                <Button Command="{Binding CloseCommand}" HorizontalAlignment="Right"
+                        Width="40" Height="40"
+                        Background="Transparent" BorderThickness="0" Cursor="Hand">
+                    <TextBlock Text="✕" Foreground="#666" FontSize="14" FontWeight="Light"/>
+                </Button>
             </Grid>
 
             <!-- 2. SOL PANEL (AYARLAR) -->
@@ -199,20 +267,38 @@
                                 <TextBlock Text="Grid Düzeni" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
                                 
                                 <StackPanel>
-                                    <TextBlock Text="SATIR" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
-                                    <Grid Margin="0,0,0,12">
-                                        <Slider Minimum="1" Maximum="8" Value="{Binding Rows, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                                        <TextBlock Text="{Binding Rows}" Foreground="{StaticResource AccentColor}" FontWeight="Bold" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" IsHitTestVisible="False"/>
+                                    <TextBlock Text="SATIR" FontSize="10" Foreground="#888" Margin="0,0,0,8"/>
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="35"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Grid.Column="0" Minimum="1" Maximum="8" Value="{Binding Rows, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center"/>
+                                        <Border Grid.Column="1" Background="#1A1A1A" CornerRadius="4" Padding="8,4" Margin="8,0,0,0">
+                                            <TextBlock Text="{Binding Rows}" Foreground="{StaticResource AccentColor}" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
                                     </Grid>
 
-                                    <TextBlock Text="SÜTUN" FontSize="10" Foreground="#888" Margin="0,0,0,5"/>
-                                    <Grid Margin="0,0,0,5">
-                                        <Slider Minimum="1" Maximum="10" Value="{Binding Columns, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                                        <TextBlock Text="{Binding Columns}" Foreground="{StaticResource AccentColor}" FontWeight="Bold" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" IsHitTestVisible="False"/>
+                                    <TextBlock Text="SÜTUN" FontSize="10" Foreground="#888" Margin="0,0,0,8"/>
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="35"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Grid.Column="0" Minimum="1" Maximum="10" Value="{Binding Columns, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center"/>
+                                        <Border Grid.Column="1" Background="#1A1A1A" CornerRadius="4" Padding="8,4" Margin="8,0,0,0">
+                                            <TextBlock Text="{Binding Columns}" Foreground="{StaticResource AccentColor}" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
                                     </Grid>
-
-                                    <TextBlock Text="Not: Maksimum 8 satır ve 10 sütun kullanılabilir." FontSize="11" Foreground="#777" Margin="0,10,0,0" TextWrapping="Wrap"/>
                                 </StackPanel>
+
+                                <!-- Bilgi Notu -->
+                                <Border Background="#1A1A1A" CornerRadius="4" Padding="8" Margin="0,5,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="ℹ️" FontSize="11" Margin="0,0,6,0"/>
+                                        <TextBlock Text="Maks: 8 satır × 10 sütun" FontSize="10" Foreground="#666"/>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
                         </Border>
 
@@ -227,13 +313,21 @@
                         <Separator Background="#333" Margin="0,20"/>
 
                         <!-- Manuel Kaydet Butonu -->
-                        <Button Command="{Binding SaveCommand}" Content="💾 KAYDET VE KAPAT" Style="{StaticResource PrimaryBtn}"/>
+                        <Button Command="{Binding SaveCommand}" Style="{StaticResource PrimaryBtn}">
+                            <TextBlock Text="💾  KAYDET VE KAPAT" FontWeight="SemiBold" FontSize="13">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#121212"/>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
 
             <!-- 3. ORTA PANEL (SANAL GRİD ÖNİZLEME) -->
-            <Grid Grid.Row="1" Grid.Column="1" Margin="20">
+            <Grid Grid.Row="1" Grid.Column="1" Margin="15,10,15,15">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Başlık -->
                     <RowDefinition Height="*"/>    <!-- Önizleme -->
@@ -243,11 +337,11 @@
                 <TextBlock Grid.Row="0" Text="🎨 WIDGET ÖNİZLEME" 
                            Foreground="{StaticResource AccentColor}" 
                            FontWeight="Bold" FontSize="14" 
-                           Margin="10,0,0,15"/>
+                           Margin="5,0,0,10"/>
 
                 <!-- SANAL GRİD CONTAINER -->
                 <Border Grid.Row="1" Background="#0A0A0A" CornerRadius="10" 
-                        BorderBrush="#333" BorderThickness="1" Padding="20">
+                        BorderBrush="#333" BorderThickness="1" Padding="15">
                     <Viewbox Stretch="Uniform">
                         <ItemsControl ItemsSource="{Binding DeckItems}">
                             <ItemsControl.ItemsPanel>
@@ -327,23 +421,30 @@
                                                                         </TextBlock.Style>
                                                                     </TextBlock>
                                                                     
-                                                                    <TextBlock Text="{Binding Title}" 
-                                                                               Foreground="White" 
-                                                                               FontWeight="Bold" FontSize="10"
-                                                                               HorizontalAlignment="Center" 
-                                                                               VerticalAlignment="Center"
-                                                                               TextWrapping="Wrap" 
-                                                                               TextAlignment="Center">
-                                                                        <TextBlock.Style>
-                                                                            <Style TargetType="TextBlock">
+                                                                    <!-- Metin arka planı ve gölge için container -->
+                                                                    <Border VerticalAlignment="Bottom" HorizontalAlignment="Stretch" 
+                                                                            Background="#99000000" CornerRadius="0,0,6,6" Padding="3,2">
+                                                                        <Border.Style>
+                                                                            <Style TargetType="Border">
                                                                                 <Style.Triggers>
                                                                                     <DataTrigger Binding="{Binding Title}" Value="Boş">
                                                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                                                     </DataTrigger>
                                                                                 </Style.Triggers>
                                                                             </Style>
-                                                                        </TextBlock.Style>
-                                                                    </TextBlock>
+                                                                        </Border.Style>
+                                                                        <TextBlock Text="{Binding Title}" 
+                                                                                   Foreground="White" 
+                                                                                   FontWeight="SemiBold" FontSize="9"
+                                                                                   HorizontalAlignment="Center" 
+                                                                                   TextWrapping="NoWrap" 
+                                                                                   TextTrimming="CharacterEllipsis"
+                                                                                   TextAlignment="Center">
+                                                                            <TextBlock.Effect>
+                                                                                <DropShadowEffect ShadowDepth="1" BlurRadius="2" Opacity="0.8" Color="#000"/>
+                                                                            </TextBlock.Effect>
+                                                                        </TextBlock>
+                                                                    </Border>
                                                                 </Grid>
                                                             </Border>
                                                             <ControlTemplate.Triggers>
