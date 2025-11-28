@@ -13,6 +13,7 @@ public class DeckItem : ObservableObject
     private int _row;
     private int _column;
     private string? _iconPath;
+    private string? _icon; // Segoe MDL2 veya Emoji karakter
     private bool _isSelected;
     private string _behaviorType = "Push"; // "Push" veya "Toggle"
     private bool _isActive; // Toggle butonlar için runtime state (JSON'a kaydedilmez)
@@ -86,10 +87,27 @@ public class DeckItem : ObservableObject
         get => _iconPath;
         set 
         { 
-            if (_iconPath != value) // Gereksiz tetiklemeyi �nle
+            if (_iconPath != value) // Gereksiz tetiklemeyi önle
             {
                 _iconPath = value;
                 OnPropertyChanged(); // UI'a bildir
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Segoe MDL2 Assets veya Emoji karakter ikonu
+    /// IconPath boşken bu gösterilir
+    /// </summary>
+    public string? Icon
+    {
+        get => _icon;
+        set 
+        { 
+            if (_icon != value)
+            {
+                _icon = value;
+                OnPropertyChanged();
             }
         }
     }

@@ -77,6 +77,8 @@ public partial class EditorWindow : Window
                 targetItem.Command = deckItem.Command;
                 targetItem.Color = deckItem.Color;
                 targetItem.BehaviorType = deckItem.BehaviorType;
+                targetItem.Icon = deckItem.Icon; // Segoe MDL2 veya Emoji ikonu kopyala
+                targetItem.IconPath = deckItem.IconPath; // Özel dosya yolu (varsa)
 
                 // Seçili yap
                 vm.SelectedDeckItem = targetItem;

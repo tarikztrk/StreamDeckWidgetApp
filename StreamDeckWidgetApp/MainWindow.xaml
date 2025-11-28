@@ -101,17 +101,58 @@
                                                             <Rectangle x:Name="HoverOverlay" Fill="White" Opacity="0"
                                                                  IsHitTestVisible="False" RadiusX="8" RadiusY="8"/>
 
+                                                            <!-- Dosya İkonu (IconPath varsa) -->
                                                             <Image Source="{Binding IconPath, Converter={StaticResource PathToImage}}" 
                                                                 Stretch="UniformToFill"
                                                                 Opacity="0.8"/>
                                                             
-                                                            <TextBlock Text="{Binding Title}" 
-                                                                 Foreground="White" 
-                                                                 FontWeight="Bold"
-                                                                 HorizontalAlignment="Center" 
-                                                                 VerticalAlignment="Center"
-                                                                 TextWrapping="Wrap" 
-                                                                 TextAlignment="Center"/>
+                                                            <!-- Segoe MDL2 / Emoji İkonu (Icon varsa) -->
+                                                            <TextBlock Text="{Binding Icon}" FontFamily="Segoe MDL2 Assets"
+                                                                       FontSize="32" Foreground="White" 
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                       Margin="0,0,0,10"
+                                                                       Opacity="0.95">
+                                                                <TextBlock.Effect>
+                                                                    <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.5" Color="#000"/>
+                                                                </TextBlock.Effect>
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Icon}" Value="">
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding Icon}" Value="{x:Null}">
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            
+                                                            <!-- Alt kısımda metin için gradient overlay -->
+                                                            <Border VerticalAlignment="Bottom" HorizontalAlignment="Stretch" 
+                                                                    CornerRadius="0,0,6,6" Padding="4,12,4,4" Height="36">
+                                                                <Border.Background>
+                                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                        <GradientStop Color="Transparent" Offset="0"/>
+                                                                        <GradientStop Color="#99000000" Offset="0.35"/>
+                                                                        <GradientStop Color="#CC000000" Offset="1"/>
+                                                                    </LinearGradientBrush>
+                                                                </Border.Background>
+                                                                <TextBlock Text="{Binding Title}" 
+                                                                     Foreground="White" 
+                                                                     FontWeight="Bold"
+                                                                     HorizontalAlignment="Center" 
+                                                                     VerticalAlignment="Bottom"
+                                                                     TextWrapping="NoWrap"
+                                                                     TextTrimming="CharacterEllipsis"
+                                                                     TextAlignment="Center">
+                                                                    <TextBlock.Effect>
+                                                                        <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.9" Color="#000"/>
+                                                                    </TextBlock.Effect>
+                                                                </TextBlock>
+                                                            </Border>
                                                         </Grid>
                                                     </Border>
                                                     

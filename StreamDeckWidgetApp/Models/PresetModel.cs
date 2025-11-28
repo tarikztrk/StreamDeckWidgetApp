@@ -26,7 +26,8 @@ public class PresetModel
             ActionType = ActionType,
             Command = Command,
             Color = Color,
-            IconPath = null, // İleride custom icon desteği için
+            Icon = Icon, // Segoe MDL2 veya Emoji ikonunu kopyala
+            IconPath = null, // Özel ikon dosyası için
             BehaviorType = "Push"
         };
     }

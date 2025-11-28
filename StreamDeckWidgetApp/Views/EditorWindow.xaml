@@ -179,24 +179,25 @@
 
         <!-- MODERN COMBOBOX STİLİ (DARK DROPDOWN) -->
         <Style x:Key="ComboBoxItemStyle" TargetType="ComboBoxItem">
-            <Setter Property="Background" Value="{StaticResource BgInput}"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Margin" Value="2"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBoxItem">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0"/>
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#3A3A3A"/>
-                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#3D3D3D"/>
+                                <Setter Property="Foreground" Value="White"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#2A2A2A"/>
-                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#2A4A5A"/>
+                                <Setter Property="Foreground" Value="White"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -219,9 +220,12 @@
                                 <Path x:Name="Arrow" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" Data="M 0 0 L 4 4 L 8 0 Z" Fill="{StaticResource TextPrimary}"/>
                             </ToggleButton>
                             <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" VerticalAlignment="Center" Margin="4,0,30,0"/>
-                            <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
-                                <Border Background="{StaticResource BgPanel}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6">
-                                    <ScrollViewer Margin="4" SnapsToDevicePixels="True">
+                            <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                <Border Background="{StaticResource BgPanel}" BorderBrush="#444" BorderThickness="1" CornerRadius="8" Margin="0,4,0,0">
+                                    <Border.Effect>
+                                        <DropShadowEffect ShadowDepth="2" BlurRadius="10" Opacity="0.4" Color="#000"/>
+                                    </Border.Effect>
+                                    <ScrollViewer Margin="4,6" SnapsToDevicePixels="True" MaxHeight="200">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
                                     </ScrollViewer>
                                 </Border>
@@ -335,8 +339,8 @@
                         <Separator Background="#333" Margin="0,20"/>
 
                         <!-- Manuel Kaydet Butonu -->
-                        <Button Command="{Binding SaveCommand}" Style="{StaticResource PrimaryBtn}">
-                            <TextBlock Text="💾  KAYDET VE KAPAT" FontWeight="SemiBold" FontSize="13">
+                        <Button Command="{Binding SaveAndCloseCommand}" Style="{StaticResource PrimaryBtn}">
+                            <TextBlock Text="{Binding SaveButtonText}" FontWeight="SemiBold" FontSize="13">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground" Value="#121212"/>
@@ -363,9 +367,9 @@
 
                 <!-- SANAL GRİD CONTAINER -->
                 <Border Grid.Row="1" Background="#0A0A0A" CornerRadius="10" 
-                        BorderBrush="#333" BorderThickness="1" Padding="10">
-                    <Viewbox Stretch="Uniform" Margin="5">
-                        <ItemsControl ItemsSource="{Binding DeckItems}">
+                        BorderBrush="#333" BorderThickness="1" Padding="8">
+                    <Viewbox Stretch="Uniform" StretchDirection="Both">
+                        <ItemsControl ItemsSource="{Binding DeckItems}" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Columns="{Binding Columns}"/>
@@ -399,12 +403,12 @@
                                                                             <DataTrigger Binding="{Binding Title}" Value="Boş">
                                                                                 <Setter Property="BorderBrush">
                                                                                     <Setter.Value>
-                                                                                        <DrawingBrush Viewport="0,0,8,8" ViewportUnits="Absolute" TileMode="Tile">
+                                                                                        <DrawingBrush Viewport="0,0,6,6" ViewportUnits="Absolute" TileMode="Tile">
                                                                                             <DrawingBrush.Drawing>
                                                                                                 <DrawingGroup>
-                                                                                                    <GeometryDrawing Brush="#444">
+                                                                                                    <GeometryDrawing Brush="#4CC2FF">
                                                                                                         <GeometryDrawing.Geometry>
-                                                                                                            <RectangleGeometry Rect="0,0,4,2"/>
+                                                                                                            <RectangleGeometry Rect="0,0,3,3"/>
                                                                                                         </GeometryDrawing.Geometry>
                                                                                                     </GeometryDrawing>
                                                                                                 </DrawingGroup>
@@ -413,7 +417,7 @@
                                                                                     </Setter.Value>
                                                                                 </Setter>
                                                                                 <Setter Property="BorderThickness" Value="2"/>
-                                                                                <Setter Property="Background" Value="#0A0A0A"/>
+                                                                                <Setter Property="Background" Value="#151515"/>
                                                                             </DataTrigger>
                                                                             <!-- Seçili buton -->
                                                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
@@ -424,15 +428,47 @@
                                                                     </Style>
                                                                 </Border.Style>
                                                                 <Grid>
+                                                                    <!-- Dosya İkonu (IconPath varsa) -->
                                                                     <Image Source="{Binding IconPath, Converter={StaticResource PathToImage}}" 
                                                                            Stretch="UniformToFill" Opacity="0.8"/>
                                                                     
-                                                                    <!-- Boş slot için + ikonu -->
-                                                                    <TextBlock Text="+" FontSize="28" Foreground="#666" 
+                                                                    <!-- Segoe MDL2 / Emoji İkonu (Icon varsa, IconPath yoksa) -->
+                                                                    <TextBlock Text="{Binding Icon}" FontFamily="Segoe MDL2 Assets"
+                                                                               FontSize="36" Foreground="White" 
                                                                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                               FontWeight="Normal">
+                                                                               Opacity="0.9">
                                                                         <TextBlock.Effect>
-                                                                            <DropShadowEffect ShadowDepth="0" BlurRadius="8" Opacity="0.3" Color="#4CC2FF"/>
+                                                                            <DropShadowEffect ShadowDepth="2" BlurRadius="6" Opacity="0.6" Color="#000"/>
+                                                                        </TextBlock.Effect>
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                                <Style.Triggers>
+                                                                                    <!-- IconPath varsa gizle -->
+                                                                                    <DataTrigger Binding="{Binding IconPath, Converter={StaticResource PathToImage}}" Value="{x:Null}">
+                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                    </DataTrigger>
+                                                                                    <!-- Icon boşsa gizle -->
+                                                                                    <DataTrigger Binding="{Binding Icon}" Value="">
+                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                    </DataTrigger>
+                                                                                    <DataTrigger Binding="{Binding Icon}" Value="{x:Null}">
+                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                    </DataTrigger>
+                                                                                    <DataTrigger Binding="{Binding Title}" Value="Boş">
+                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+                                                                    
+                                                                    <!-- Boş slot için + ikonu -->
+                                                                    <TextBlock Text="+" FontSize="32" Foreground="#4CC2FF" 
+                                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                               FontWeight="Light" Opacity="0.6">
+                                                                        <TextBlock.Effect>
+                                                                            <DropShadowEffect ShadowDepth="0" BlurRadius="12" Opacity="0.5" Color="#4CC2FF"/>
                                                                         </TextBlock.Effect>
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
@@ -446,9 +482,16 @@
                                                                         </TextBlock.Style>
                                                                     </TextBlock>
                                                                     
-                                                                    <!-- Metin arka planı ve gölge için container -->
+                                                                    <!-- Metin için gradient overlay (ikon bütünlüğü korunur) -->
                                                                     <Border VerticalAlignment="Bottom" HorizontalAlignment="Stretch" 
-                                                                            Background="#CC000000" CornerRadius="0,0,6,6" Padding="4,3">
+                                                                            CornerRadius="0,0,6,6" Padding="4,8,4,4" Height="32">
+                                                                        <Border.Background>
+                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                <GradientStop Color="Transparent" Offset="0"/>
+                                                                                <GradientStop Color="#AA000000" Offset="0.4"/>
+                                                                                <GradientStop Color="#DD000000" Offset="1"/>
+                                                                            </LinearGradientBrush>
+                                                                        </Border.Background>
                                                                         <Border.Style>
                                                                             <Style TargetType="Border">
                                                                                 <Style.Triggers>
@@ -460,8 +503,9 @@
                                                                         </Border.Style>
                                                                         <TextBlock Text="{Binding Title}" 
                                                                                    Foreground="White" 
-                                                                                   FontWeight="Bold" FontSize="10"
+                                                                                   FontWeight="Bold" FontSize="11"
                                                                                    HorizontalAlignment="Center" 
+                                                                                   VerticalAlignment="Bottom"
                                                                                    TextWrapping="NoWrap" 
                                                                                    TextTrimming="CharacterEllipsis"
                                                                                    TextAlignment="Center">

@@ -20,7 +20,7 @@ public class EditorViewModel : ObservableObject
 
     // --- Commands ---
     public ICommand CloseCommand { get; }
-    public ICommand SaveCommand { get; }
+    public ICommand SaveAndCloseCommand { get; }
     public ICommand ItemClickCommand => _mainViewModel.ItemClickCommand; // Proxy
 
     // --- Save Status Property ---
@@ -28,6 +28,21 @@ public class EditorViewModel : ObservableObject
     {
         get => _saveStatus;
         set => SetField(ref _saveStatus, value);
+    }
+    
+    // --- Save Button Text Property ---
+    private string _saveButtonText = "💾  KAYDET VE KAPAT";
+    public string SaveButtonText
+    {
+        get => _saveButtonText;
+        set => SetField(ref _saveButtonText, value);
+    }
+    
+    private bool _isSaving;
+    public bool IsSaving
+    {
+        get => _isSaving;
+        set => SetField(ref _isSaving, value);
     }
 
     // --- Proxied Properties from MainViewModel ---
@@ -83,8 +98,8 @@ public class EditorViewModel : ObservableObject
         // Close command - notify MainViewModel to clean up
         CloseCommand = new RelayCommand(_ => CloseEditor());
 
-        // Save command - delegate to MainViewModel
-        SaveCommand = new RelayCommand(_ => SaveNow());
+        // Save and Close command - save, show feedback, then close
+        SaveAndCloseCommand = new RelayCommand(_ => SaveAndClose());
         
         // Initialize debounce timer (500ms delay)
         _saveTimer = new DispatcherTimer
@@ -166,6 +181,30 @@ public class EditorViewModel : ObservableObject
                 });
             });
         }
+    }
+    
+    /// <summary>
+    /// Save changes, show feedback, then close the editor
+    /// </summary>
+    private async void SaveAndClose()
+    {
+        if (IsSaving) return;
+        IsSaving = true;
+        
+        // Kaydet
+        _mainViewModel.SaveChanges();
+        _hasUnsavedChanges = false;
+        
+        // Buton feedback
+        SaveButtonText = "✓ Kaydedildi!";
+        SaveStatus = "✓ Tüm değişiklikler kaydedildi";
+        
+        // Kısa gecikme sonra kapat (kullanıcı feedback'i görsün)
+        await Task.Delay(600);
+        
+        // Pencereyi kapat
+        IsSaving = false;
+        CloseEditor();
     }
 
     /// <summary>
