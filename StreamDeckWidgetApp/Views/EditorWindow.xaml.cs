@@ -2,10 +2,11 @@ using System.Windows;
 using System.Windows.Input;
 using StreamDeckWidgetApp.Models;
 using StreamDeckWidgetApp.ViewModels;
+using Wpf.Ui.Controls;
 
 namespace StreamDeckWidgetApp.Views;
 
-public partial class EditorWindow : Window
+public partial class EditorWindow : FluentWindow
 {
     private Point _dragStartPoint;
     private bool _isDragging = false;
