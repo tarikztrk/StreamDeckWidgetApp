@@ -106,21 +106,6 @@ public class MainViewModel : ObservableObject
             }
         }
     }
-    
-    // Dinamik Pencere Boyutları
-    private double _windowWidth = 200;
-    public double WindowWidth
-    {
-        get => _windowWidth;
-        private set => SetField(ref _windowWidth, value);
-    }
-    
-    private double _windowHeight = 200;
-    public double WindowHeight
-    {
-        get => _windowHeight;
-        private set => SetField(ref _windowHeight, value);
-    }
 
     // ComboBox için Action Tipleri
     public List<string> ActionTypes { get; } = new() 
@@ -244,6 +229,7 @@ public class MainViewModel : ObservableObject
         
         // Kütüphaneyi ilk yükle
         LoadLibrary();
+        
     }
 
     private void LoadData()
@@ -258,7 +244,6 @@ public class MainViewModel : ObservableObject
         
         // Veri yüklendikten sonra Grid'i olması gereken sayıya tamamla
         RefreshGrid();
-        
     }
     
     private void LoadProfiles()
@@ -376,49 +361,45 @@ public class MainViewModel : ObservableObject
     {
         int totalSlots = Rows * Columns;
         
-        // Mevcut verileri koru ama g�r�n�m� yeni boyuta ayarla
-        DeckItems.Clear();
+        // Önce profildeki item sayısını ayarla
+        while (_currentProfile.Items.Count < totalSlots)
+        {
+            int i = _currentProfile.Items.Count;
+            _currentProfile.Items.Add(new DeckItem
+            {
+                Title = "Boş",
+                Color = "#222222",
+                Row = i / Columns,
+                Column = i % Columns
+            });
+        }
         
+        // Fazla itemleri kaldır
+        while (_currentProfile.Items.Count > totalSlots)
+        {
+            _currentProfile.Items.RemoveAt(_currentProfile.Items.Count - 1);
+        }
+        
+        // Her elemanın satır/sütun bilgisini güncelle
         for (int i = 0; i < totalSlots; i++)
         {
-            // Eğer kayıtlı veri yetmiyorsa yeni boş buton oluştur
-            if (i >= _currentProfile.Items.Count)
-            {
-                _currentProfile.Items.Add(new DeckItem
-                {
-                    Title = "Boş",
-                    Color = "#222222",
-                    Row = i / Columns,
-                    Column = i % Columns
-                });
-            }
-
-            // Her elemanın satır/sütun bilgisini güncelle - tutarlılık için önemli
             var item = _currentProfile.Items[i];
             item.Row = i / Columns;
             item.Column = i % Columns;
-
+        }
+        
+        // DeckItems koleksiyonunu yeniden oluştur
+        DeckItems.Clear();
+        foreach (var item in _currentProfile.Items)
+        {
             DeckItems.Add(item);
         }
+        
+        // UI'ın güncellenmesini zorla
+        OnPropertyChanged(nameof(DeckItems));
+        OnPropertyChanged(nameof(Rows));
+        OnPropertyChanged(nameof(Columns));
     }
-
-    // Pencere boyutunu dinamik olarak hesaplar
-    private void UpdateWindowSize()
-    {
-        double buttonWithMargin = SelectedButtonSize + 10;
-        
-        double gridWidth = Columns * buttonWithMargin;
-        double gridHeight = Rows * buttonWithMargin;
-        
-        double paddingHorizontal = 16;  // 8px sol + 8px sağ
-        double paddingVertical = 16;    // 8px üst + 8px alt
-        double titleBarHeight = 32;
-        double editorIndicatorHeight = 11; // 3px + 8px margin
-        
-        WindowWidth = gridWidth + paddingHorizontal;
-        WindowHeight = gridHeight + paddingVertical + titleBarHeight + editorIndicatorHeight;
-    }
-
 
 
     private void OnItemClick(object? parameter)
@@ -529,6 +510,17 @@ public class MainViewModel : ObservableObject
     public void SetMainWindow(Window mainWindow)
     {
         _mainWindow = mainWindow;
+    }
+    
+    /// <summary>
+    /// Layout'u zorla yenile - ilk açılışta boşluk sorunu için
+    /// </summary>
+    public void ForceLayoutRefresh()
+    {
+        OnPropertyChanged(nameof(DeckItems));
+        OnPropertyChanged(nameof(Rows));
+        OnPropertyChanged(nameof(Columns));
+        OnPropertyChanged(nameof(SelectedButtonSize));
     }
 
     public void SaveChanges()

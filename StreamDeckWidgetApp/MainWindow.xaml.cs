@@ -15,6 +15,26 @@ public partial class MainWindow : FluentWindow
         
         // ViewModel'e MainWindow referansını ver (Modal mod için)
         viewModel.SetMainWindow(this);
+        
+        // İlk yüklemede layout sorununu önlemek için
+        Loaded += MainWindow_Loaded;
+    }
+    
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Layout'u zorla güncelle - ilk açılışta boşluk sorununu düzeltir
+        Dispatcher.InvokeAsync(() =>
+        {
+            InvalidateMeasure();
+            InvalidateArrange();
+            UpdateLayout();
+            
+            // ViewModel'e de bildir
+            if (DataContext is MainViewModel vm)
+            {
+                vm.ForceLayoutRefresh();
+            }
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     // Drag & Drop Event Handler

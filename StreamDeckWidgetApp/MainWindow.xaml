@@ -22,7 +22,7 @@
         <converters:ImagePathToImageSourceConverter x:Key="PathToImage"/>
     </ui:FluentWindow.Resources>
 
-    <Grid Margin="8">
+    <Grid Margin="1">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <!-- TitleBar -->
@@ -57,13 +57,11 @@
 
         <!-- Butonlar (Deck Items) -->
 
-        <ui:VirtualizingItemsControl Grid.Row="1"
-                                     ItemsSource="{Binding DeckItems, Mode=OneWay}"
-                                     HorizontalAlignment="Center"
-                                     VerticalAlignment="Center"
-                                     VirtualizingPanel.CacheLengthUnit="Pixel"
-                                     Margin="0"
-                                     >
+        <ItemsControl Grid.Row="1"
+                     ItemsSource="{Binding DeckItems}"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Margin="0">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Columns="{Binding DataContext.Columns, RelativeSource={RelativeSource AncestorType=Window}}"/>
@@ -140,6 +138,6 @@
                     </Button>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-        </ui:VirtualizingItemsControl>
+        </ItemsControl>
     </Grid>
 </ui:FluentWindow>
