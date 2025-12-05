@@ -62,6 +62,7 @@ public class MainViewModel : ObservableObject
                 _currentProfile.Rows = newVal;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
+                UpdateWindowSize(); // Pencere boyutunu güncelle
             }
         }
     }
@@ -78,6 +79,7 @@ public class MainViewModel : ObservableObject
                 _currentProfile.Columns = newVal;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
+                UpdateWindowSize(); // Pencere boyutunu güncelle
             }
         }
     }
@@ -100,8 +102,24 @@ public class MainViewModel : ObservableObject
             {
                 _currentProfile.ButtonSize = value;
                 OnPropertyChanged();
+                UpdateWindowSize(); // Pencere boyutunu güncelle
             }
         }
+    }
+    
+    // Dinamik Pencere Boyutları
+    private double _windowWidth = 200;
+    public double WindowWidth
+    {
+        get => _windowWidth;
+        private set => SetField(ref _windowWidth, value);
+    }
+    
+    private double _windowHeight = 200;
+    public double WindowHeight
+    {
+        get => _windowHeight;
+        private set => SetField(ref _windowHeight, value);
     }
 
     // ComboBox için Action Tipleri
@@ -240,6 +258,9 @@ public class MainViewModel : ObservableObject
         
         // Veri yüklendikten sonra Grid'i olması gereken sayıya tamamla
         RefreshGrid();
+        
+        // Pencere boyutunu başlangıçta hesapla
+        UpdateWindowSize();
     }
     
     private void LoadProfiles()
@@ -270,6 +291,7 @@ public class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentProfile));
         
         RefreshGrid();
+        UpdateWindowSize();
         LoadProfiles();
     }
     
@@ -293,6 +315,7 @@ public class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentProfile));
         
         RefreshGrid();
+        UpdateWindowSize();
         LoadProfiles();
     }
     
@@ -326,6 +349,7 @@ public class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentProfile));
         
         RefreshGrid();
+        UpdateWindowSize();
         LoadProfiles();
     }
     
@@ -345,6 +369,7 @@ public class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentProfile));
         
         RefreshGrid();
+        UpdateWindowSize();
         LoadProfiles();
     }
 
@@ -377,6 +402,23 @@ public class MainViewModel : ObservableObject
 
             DeckItems.Add(item);
         }
+    }
+
+    // Pencere boyutunu dinamik olarak hesaplar
+    private void UpdateWindowSize()
+    {
+        double buttonWithMargin = SelectedButtonSize + 10;
+        
+        double gridWidth = Columns * buttonWithMargin;
+        double gridHeight = Rows * buttonWithMargin;
+        
+        double paddingHorizontal = 16;  // 8px sol + 8px sağ
+        double paddingVertical = 16;    // 8px üst + 8px alt
+        double titleBarHeight = 32;
+        double editorIndicatorHeight = 11; // 3px + 8px margin
+        
+        WindowWidth = gridWidth + paddingHorizontal;
+        WindowHeight = gridHeight + paddingVertical + titleBarHeight + editorIndicatorHeight;
     }
 
 
@@ -414,7 +456,7 @@ public class MainViewModel : ObservableObject
 
         try
         {
-            // Widget penceresini animasyonlu gizle (Modal mod)
+            // Widget penceresini animasyonlı gizle (Modal mod)
             if (_mainWindow != null)
             {
                 // FadeOut animasyonu
@@ -465,7 +507,7 @@ public class MainViewModel : ObservableObject
         SelectedDeckItem = null;
         OnPropertyChanged(nameof(IsEditorOpen));
         
-        // Widget'ı animasyonlu göster (Modal mod sonu)
+        // Widget'ı animasyonlı göster (Modal mod sonu)
         if (_mainWindow != null)
         {
             _mainWindow.Opacity = 0.0;
@@ -518,7 +560,7 @@ public class MainViewModel : ObservableObject
             return; 
         }
 
-        // 2. E�er EXE veya K�sayol ise (G�NCELLEND�)
+        // 2. E�er EXE veya Kısayol ise (G�NCELLEND�)
         if (ext == ".exe" || ext == ".lnk" || ext == ".bat")
         {
             targetItem.Title = fileName;
