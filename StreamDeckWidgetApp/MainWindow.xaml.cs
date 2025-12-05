@@ -1,11 +1,11 @@
 using System.Windows;
-using System.Windows.Input;
+using Wpf.Ui.Controls;
 using StreamDeckWidgetApp.Models;
 using StreamDeckWidgetApp.ViewModels;
 
 namespace StreamDeckWidgetApp;
 
-public partial class MainWindow : Window
+public partial class MainWindow : FluentWindow
 {
     // Dependency Injection ile ViewModel'i aliyoruz
     public MainWindow(MainViewModel viewModel)
@@ -15,13 +15,6 @@ public partial class MainWindow : Window
         
         // ViewModel'e MainWindow referansını ver (Modal mod için)
         viewModel.SetMainWindow(this);
-    }
-
-    // Pencereyi suruklemek icin gerekli (MVVM'de View logic kabul edilir)
-    private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.ChangedButton == MouseButton.Left)
-            DragMove();
     }
 
     // Drag & Drop Event Handler
