@@ -4,6 +4,7 @@ using StreamDeckWidgetApp.Abstractions;
 using StreamDeckWidgetApp.Services;
 using StreamDeckWidgetApp.ViewModels;
 using StreamDeckWidgetApp.Views;
+using Wpf.Ui.Appearance;
 
 namespace StreamDeckWidgetApp;
 
@@ -48,6 +49,11 @@ public partial class App : Application
 
         // MainWindow'u DI Container üzerinden çözümlüyoruz
         var mainWindow = Services.GetRequiredService<MainWindow>();
+
+        // Wpf.Ui Tema Motorunu Başlat - Dark Tema Zorla
+        SystemThemeWatcher.Watch(mainWindow);
+        ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+
         mainWindow.Show();
     }
 }
