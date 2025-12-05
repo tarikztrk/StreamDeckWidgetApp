@@ -40,16 +40,22 @@
                      Margin="0,0,0,8"
                      ShowMaximize="False"
                      ShowMinimize="False"
-                     >
-            <ui:TitleBar.Header>
-                    <ui:TitleBarButton Command="{Binding OpenEditorCommand}"
-                                       Icon="{ui:SymbolIcon Settings28}"
-                                       ToolTip="Edit Deck"
-                            ButtonType="Help"/>
-
-
-        
-            </ui:TitleBar.Header>
+                     ShowHelp="False">
+            <ui:TitleBar.TrailingContent>
+                <ui:Button Command="{Binding OpenEditorCommand}"
+                           Icon="{ui:SymbolIcon Settings28}"
+                           ToolTip="Settings"
+                           Width="44"
+                           Height="30"
+                           Appearance="Transparent"
+                           Background="Transparent"
+                           BorderThickness="0"
+                           Padding="0"
+                           Margin="0,0,0,0"
+                           >
+                   
+                </ui:Button>
+            </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
 
         <!-- Editör durumu göstergesi -->
