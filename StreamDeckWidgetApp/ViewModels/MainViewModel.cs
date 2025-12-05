@@ -62,7 +62,7 @@ public class MainViewModel : ObservableObject
                 _currentProfile.Rows = newVal;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
-                UpdateWindowSize(); // Pencere boyutunu güncelle
+                 
             }
         }
     }
@@ -79,7 +79,7 @@ public class MainViewModel : ObservableObject
                 _currentProfile.Columns = newVal;
                 OnPropertyChanged();
                 RefreshGrid(); // Grid boyutunu yeniden hesapla
-                UpdateWindowSize(); // Pencere boyutunu güncelle
+                 
             }
         }
     }
@@ -102,7 +102,7 @@ public class MainViewModel : ObservableObject
             {
                 _currentProfile.ButtonSize = value;
                 OnPropertyChanged();
-                UpdateWindowSize(); // Pencere boyutunu güncelle
+                 
             }
         }
     }
@@ -259,8 +259,6 @@ public class MainViewModel : ObservableObject
         // Veri yüklendikten sonra Grid'i olması gereken sayıya tamamla
         RefreshGrid();
         
-        // Pencere boyutunu başlangıçta hesapla
-        UpdateWindowSize();
     }
     
     private void LoadProfiles()
@@ -291,7 +289,7 @@ public class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentProfile));
         
         RefreshGrid();
-        UpdateWindowSize();
+        
         LoadProfiles();
     }
     
@@ -315,7 +313,7 @@ public class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentProfile));
         
         RefreshGrid();
-        UpdateWindowSize();
+        
         LoadProfiles();
     }
     
@@ -349,7 +347,7 @@ public class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentProfile));
         
         RefreshGrid();
-        UpdateWindowSize();
+        
         LoadProfiles();
     }
     
@@ -369,7 +367,7 @@ public class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentProfile));
         
         RefreshGrid();
-        UpdateWindowSize();
+        
         LoadProfiles();
     }
 

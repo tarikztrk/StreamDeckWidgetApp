@@ -7,16 +7,15 @@
                  xmlns:converters="clr-namespace:StreamDeckWidgetApp.Core.Converters"
                  xmlns:behaviors="clr-namespace:StreamDeckWidgetApp.Core.Behaviors"
                  mc:Ignorable="d"
-        Title="Virtual Deck"
-                 Width="{Binding WindowWidth, Mode=OneWay}"
-                 Height="{Binding WindowHeight, Mode=OneWay}"
-                 MinWidth="200"
-                 MinHeight="200"
+                 Title="Virtual Deck"
+                 SizeToContent="WidthAndHeight"
                  ResizeMode="NoResize"
                  Topmost="True"
                  WindowCornerPreference="Round"
                  WindowBackdropType="Mica"
-                 ExtendsContentIntoTitleBar="True">
+                 ExtendsContentIntoTitleBar="True"
+                 MinHeight="100"
+                 MinWidth="100">
 
     <ui:FluentWindow.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -28,8 +27,6 @@
             <RowDefinition Height="Auto"/>
             <!-- TitleBar -->
             <RowDefinition Height="Auto"/>
-            <!-- Editor Indicator -->
-            <RowDefinition Height="Auto"/>
             <!-- Deck Items - BURADA * YERINE Auto -->
         </Grid.RowDefinitions>
 
@@ -37,7 +34,7 @@
         <ui:TitleBar Grid.Row="0"
                      Title="My Deck"
                      Height="32"
-                     Margin="0,0,0,8"
+                     Margin="0,0,0,0"
                      ShowMaximize="False"
                      ShowMinimize="False"
                      ShowHelp="False">
@@ -51,19 +48,22 @@
                            Background="Transparent"
                            BorderThickness="0"
                            Padding="0"
-                           Margin="0,0,0,0"
-                           >
-                   
+                           Margin="0,0,0,0">
+
                 </ui:Button>
             </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
 
 
         <!-- Butonlar (Deck Items) -->
-        <ItemsControl Grid.Row="1"
-                      ItemsSource="{Binding DeckItems}"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Center">
+
+        <ui:VirtualizingItemsControl Grid.Row="1"
+                                     ItemsSource="{Binding DeckItems, Mode=OneWay}"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     VirtualizingPanel.CacheLengthUnit="Pixel"
+                                     Margin="0"
+                                     >
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Columns="{Binding DataContext.Columns, RelativeSource={RelativeSource AncestorType=Window}}"/>
@@ -73,7 +73,7 @@
                 <DataTemplate>
                     <Button Command="{Binding DataContext.ItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                             CommandParameter="{Binding}"
-                            Margin="5"
+                            Margin="1"
                             Cursor="Hand"
                             BorderThickness="0"
                             Width="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -111,14 +111,6 @@
                                                     </Style>
                                                 </Border.Style>
                                                 <Grid x:Name="ContentGrid">
-                                                    <!-- Hover overlay: beyaz ile hafif parlaklık efekti verir -->
-                                                    <Rectangle x:Name="HoverOverlay"
-                                                               Fill="White"
-                                                               Opacity="0"
-                                                               IsHitTestVisible="False"
-                                                               RadiusX="8"
-                                                               RadiusY="8"/>
-
                                                     <!-- Dosya İkonu (IconPath varsa) -->
                                                     <Image Source="{Binding IconPath, Converter={StaticResource PathToImage}}"
                                                            Stretch="UniformToFill"
@@ -131,175 +123,13 @@
                                                                Foreground="White"
                                                                HorizontalAlignment="Center"
                                                                VerticalAlignment="Center"
-                                                               Margin="0,0,0,10"
+                                                               Margin="0,0,0,0"
                                                                Opacity="0.95">
-                                                        <TextBlock.Effect>
-                                                            <DropShadowEffect ShadowDepth="2"
-                                                                              BlurRadius="5"
-                                                                              Opacity="0.5"
-                                                                              Color="#000"/>
-                                                        </TextBlock.Effect>
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Visibility"
-                                                                        Value="Visible"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Icon}"
-                                                                                 Value="">
-                                                                        <Setter Property="Visibility"
-                                                                                Value="Collapsed"/>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding Icon}"
-                                                                                 Value="{x:Null}">
-                                                                        <Setter Property="Visibility"
-                                                                                Value="Collapsed"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
 
-                                                    <!-- Alt kısımda metin için gradient overlay -->
-                                                    <Border VerticalAlignment="Bottom"
-                                                            HorizontalAlignment="Stretch"
-                                                            CornerRadius="0,0,6,6"
-                                                            Padding="4,12,4,4"
-                                                            Height="36">
-                                                        <Border.Background>
-                                                            <LinearGradientBrush StartPoint="0,0"
-                                                                                 EndPoint="0,1">
-                                                                <GradientStop Color="Transparent"
-                                                                              Offset="0"/>
-                                                                <GradientStop Color="#99000000"
-                                                                              Offset="0.35"/>
-                                                                <GradientStop Color="#CC000000"
-                                                                              Offset="1"/>
-                                                            </LinearGradientBrush>
-                                                        </Border.Background>
-                                                        <TextBlock Text="{Binding Title}"
-                                                                   Foreground="White"
-                                                                   FontWeight="Bold"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Bottom"
-                                                                   TextWrapping="NoWrap"
-                                                                   TextTrimming="CharacterEllipsis"
-                                                                   TextAlignment="Center">
-                                                            <TextBlock.Effect>
-                                                                <DropShadowEffect ShadowDepth="1"
-                                                                                  BlurRadius="3"
-                                                                                  Opacity="0.9"
-                                                                                  Color="#000"/>
-                                                            </TextBlock.Effect>
-                                                        </TextBlock>
-                                                    </Border>
+                                                    </TextBlock>
                                                 </Grid>
                                             </Border>
 
-                                            <ControlTemplate.Triggers>
-                                                <!-- Hover State: HoverOverlay opacity ile parlaklık simülasyonu -->
-                                                <Trigger Property="IsMouseOver"
-                                                         Value="True">
-                                                    <Trigger.EnterActions>
-                                                        <BeginStoryboard>
-                                                            <Storyboard>
-                                                                <DoubleAnimation Storyboard.TargetName="HoverOverlay"
-                                                                                 Storyboard.TargetProperty="Opacity"
-                                                                                 To="0.12"
-                                                                                 Duration="0:0:0.08"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </Trigger.EnterActions>
-                                                    <Trigger.ExitActions>
-                                                        <BeginStoryboard>
-                                                            <Storyboard>
-                                                                <DoubleAnimation Storyboard.TargetName="HoverOverlay"
-                                                                                 Storyboard.TargetProperty="Opacity"
-                                                                                 To="0.0"
-                                                                                 Duration="0:0:0.12"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </Trigger.ExitActions>
-                                                </Trigger>
-
-                                                <!-- Pressed State: Gömülme efekti (anlık) -->
-                                                <Trigger Property="IsPressed"
-                                                         Value="True">
-                                                    <Trigger.EnterActions>
-                                                        <BeginStoryboard>
-                                                            <Storyboard>
-                                                                <DoubleAnimation Storyboard.TargetName="ButtonScale"
-                                                                                 Storyboard.TargetProperty="ScaleX"
-                                                                                 To="0.95"
-                                                                                 Duration="0:0:0.05"/>
-                                                                <DoubleAnimation Storyboard.TargetName="ButtonScale"
-                                                                                 Storyboard.TargetProperty="ScaleY"
-                                                                                 To="0.95"
-                                                                                 Duration="0:0:0.05"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </Trigger.EnterActions>
-                                                    <Trigger.ExitActions>
-                                                        <BeginStoryboard>
-                                                            <Storyboard>
-                                                                <DoubleAnimation Storyboard.TargetName="ButtonScale"
-                                                                                 Storyboard.TargetProperty="ScaleX"
-                                                                                 To="1.0"
-                                                                                 Duration="0:0:0.1"/>
-                                                                <DoubleAnimation Storyboard.TargetName="ButtonScale"
-                                                                                 Storyboard.TargetProperty="ScaleY"
-                                                                                 To="1.0"
-                                                                                 Duration="0:0:0.1"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </Trigger.ExitActions>
-                                                </Trigger>
-
-                                                <!-- Toggle Active State: Basılı kalma efekti -->
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding BehaviorType}"
-                                                                   Value="Toggle"/>
-                                                        <Condition Binding="{Binding IsActive}"
-                                                                   Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <MultiDataTrigger.EnterActions>
-                                                        <BeginStoryboard>
-                                                            <Storyboard>
-                                                                <DoubleAnimation Storyboard.TargetName="ButtonScale"
-                                                                                 Storyboard.TargetProperty="ScaleX"
-                                                                                 To="0.95"
-                                                                                 Duration="0:0:0.1"/>
-                                                                <DoubleAnimation Storyboard.TargetName="ButtonScale"
-                                                                                 Storyboard.TargetProperty="ScaleY"
-                                                                                 To="0.95"
-                                                                                 Duration="0:0:0.1"/>
-                                                                <DoubleAnimation Storyboard.TargetName="HoverOverlay"
-                                                                                 Storyboard.TargetProperty="Opacity"
-                                                                                 To="0.25"
-                                                                                 Duration="0:0:0.1"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </MultiDataTrigger.EnterActions>
-                                                    <MultiDataTrigger.ExitActions>
-                                                        <BeginStoryboard>
-                                                            <Storyboard>
-                                                                <DoubleAnimation Storyboard.TargetName="ButtonScale"
-                                                                                 Storyboard.TargetProperty="ScaleX"
-                                                                                 To="1.0"
-                                                                                 Duration="0:0:0.1"/>
-                                                                <DoubleAnimation Storyboard.TargetName="ButtonScale"
-                                                                                 Storyboard.TargetProperty="ScaleY"
-                                                                                 To="1.0"
-                                                                                 Duration="0:0:0.1"/>
-                                                                <DoubleAnimation Storyboard.TargetName="HoverOverlay"
-                                                                                 Storyboard.TargetProperty="Opacity"
-                                                                                 To="0.0"
-                                                                                 Duration="0:0:0.1"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </MultiDataTrigger.ExitActions>
-                                                </MultiDataTrigger>
-                                            </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Setter.Value>
                                 </Setter>
@@ -310,6 +140,6 @@
                     </Button>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        </ui:VirtualizingItemsControl>
     </Grid>
 </ui:FluentWindow>
