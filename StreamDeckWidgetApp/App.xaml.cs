@@ -1,59 +1,57 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using StreamDeckWidgetApp.Abstractions;
 using StreamDeckWidgetApp.Services;
 using StreamDeckWidgetApp.ViewModels;
 using StreamDeckWidgetApp.Views;
-using Wpf.Ui.Appearance;
+using Wpf.Ui;
 
 namespace StreamDeckWidgetApp;
 
 public partial class App : Application
 {
-    public static IServiceProvider Services { get; private set; } = null!;
+    private readonly IHost _host;
 
     public App()
     {
-        Services = ConfigureServices();
+        _host = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                // Servis Katmanı Kayıtları
+                services.AddSingleton<IActionService, ActionService>();
+                services.AddSingleton<IConfigService, JsonConfigService>();
+
+                // ViewModel'leri Kayıt Et
+                services.AddSingleton<MainViewModel>();
+                services.AddTransient<EditorViewModel>();
+
+                // View'ları Kayıt Et
+                services.AddTransient<MainWindow>();
+                services.AddTransient<EditorWindow>();
+
+                // Func factories for MainViewModel
+                services.AddSingleton<Func<EditorViewModel>>(sp => () => sp.GetRequiredService<EditorViewModel>());
+                services.AddSingleton<Func<EditorWindow>>(sp => () => sp.GetRequiredService<EditorWindow>());
+            }).Build();
     }
 
-    private static IServiceProvider ConfigureServices()
+    protected override async void OnStartup(StartupEventArgs e)
     {
-        var services = new ServiceCollection();
+        await _host.StartAsync();
 
-        // Servis Katmanı Kayıtları
-        services.AddSingleton<IActionService, ActionService>();
-        services.AddSingleton<IConfigService, JsonConfigService>();
-
-        // ViewModel'leri Kayıt Et
-        services.AddSingleton<MainViewModel>();
-        services.AddTransient<EditorViewModel>();
-
-        // View'ları Kayıt Et
-        services.AddTransient<MainWindow>();
-        services.AddTransient<EditorWindow>();
-
-        // Func factories for MainViewModel
-        services.AddSingleton<Func<EditorViewModel>>(sp => () => sp.GetRequiredService<EditorViewModel>());
-        services.AddSingleton<Func<EditorWindow>>(sp => () => sp.GetRequiredService<EditorWindow>());
-
-        // App singleton
-        services.AddSingleton<Application>(sp => (App)Application.Current);
-
-        return services.BuildServiceProvider();
-    }
-
-    protected override void OnStartup(StartupEventArgs e)
-    {
-        base.OnStartup(e);
-
-        // MainWindow'u DI Container üzerinden çözümlüyoruz
-        var mainWindow = Services.GetRequiredService<MainWindow>();
-
-        // Wpf.Ui Tema Motorunu Başlat - Dark Tema Zorla
-        SystemThemeWatcher.Watch(mainWindow);
-        ApplicationThemeManager.Apply(ApplicationTheme.Dark);
-
+        // MainWindow'u host üzerinden çözümlüyoruz
+        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
+
+        base.OnStartup(e);
+    }
+
+    protected override async void OnExit(ExitEventArgs e)
+    {
+        await _host.StopAsync();
+        _host.Dispose();
+
+        base.OnExit(e);
     }
 }
