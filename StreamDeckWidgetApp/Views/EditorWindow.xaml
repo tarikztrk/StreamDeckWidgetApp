@@ -31,34 +31,7 @@
         <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="TextSecondary" Color="#AAAAAA"/>
 
-        <!-- MODERN TEXTBOX STİLİ -->
-        <Style TargetType="TextBox">
-            <Setter Property="Background" Value="{StaticResource BgInput}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="6">
-                            <ScrollViewer x:Name="PART_ContentHost"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
-                                <Setter Property="BorderThickness" Value="1"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <!-- WPF UI TextBox uses native styling -->
 
         <!-- MODERN LABEL STİLİ -->
         <Style TargetType="TextBlock" x:Key="Label">
@@ -121,123 +94,14 @@
             </Style.Triggers>
         </Style>
 
-        <!-- MODERN SLIDER STİLİ -->
-        <Style TargetType="Slider">
-            <Setter Property="Background" Value="#333"/>
-            <Setter Property="Foreground" Value="{StaticResource AccentColor}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Slider">
-                        <Grid>
-                            <Border Height="4" Background="#333" CornerRadius="2" VerticalAlignment="Center"/>
-                            <Track x:Name="PART_Track">
-                                <Track.Thumb>
-                                    <Thumb Width="16" Height="16" Background="{StaticResource AccentColor}" BorderThickness="0">
-                                        <Thumb.Template>
-                                            <ControlTemplate TargetType="Thumb">
-                                                <Ellipse Fill="{StaticResource AccentColor}" Width="16" Height="16">
-                                                    <Ellipse.Effect>
-                                                        <DropShadowEffect ShadowDepth="1" BlurRadius="4" Opacity="0.3" Color="#000"/>
-                                                    </Ellipse.Effect>
-                                                </Ellipse>
-                                            </ControlTemplate>
-                                        </Thumb.Template>
-                                    </Thumb>
-                                </Track.Thumb>
-                            </Track>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <!-- WPF UI Slider uses native styling -->
+
+        <!-- WPF UI Button uses native styling -->
+        <Style TargetType="ui:Button" x:Key="PrimaryBtn">
+            <Setter Property="Appearance" Value="Primary"/>
         </Style>
 
-        <!-- MODERN BUTTON STİLİ -->
-        <Style TargetType="Button" x:Key="PrimaryBtn">
-            <Setter Property="Background" Value="{StaticResource AccentColor}"/>
-            <Setter Property="Foreground" Value="#121212"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="15,10"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.9"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- MODERN COMBOBOX STİLİ (DARK DROPDOWN) -->
-        <Style x:Key="ComboBoxItemStyle" TargetType="ComboBoxItem">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="Margin" Value="2"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBoxItem">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#3D3D3D"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#2A4A5A"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Full ComboBox template to ensure Popup uses dark background -->
-        <Style TargetType="ComboBox">
-            <Setter Property="Background" Value="{StaticResource BgInput}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Grid>
-                            <ToggleButton x:Name="ToggleButton" Grid.Column="2" Focusable="false" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                          Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch">
-                                <Path x:Name="Arrow" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" Data="M 0 0 L 4 4 L 8 0 Z" Fill="{StaticResource TextPrimary}"/>
-                            </ToggleButton>
-                            <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" VerticalAlignment="Center" Margin="4,0,30,0"/>
-                            <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                                <Border Background="{StaticResource BgPanel}" BorderBrush="#444" BorderThickness="1" CornerRadius="8" Margin="0,4,0,0">
-                                    <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="2" BlurRadius="10" Opacity="0.4" Color="#000"/>
-                                    </Border.Effect>
-                                    <ScrollViewer Margin="4,6" SnapsToDevicePixels="True" MaxHeight="200">
-                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
-                                    </ScrollViewer>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="#888"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="ItemContainerStyle" Value="{DynamicResource ComboBoxItemStyle}"/>
-        </Style>
+        <!-- WPF UI ComboBox uses native styling -->
     </ui:FluentWindow.Resources>
 
     <!-- ANA TASARIM - FluentWindow Mica efektini otomatik kullanır -->
@@ -267,13 +131,8 @@
                                 <ComboBox ItemsSource="{Binding Profiles}"
                                           SelectedItem="{Binding CurrentProfile, Mode=OneWay}"
                                           DisplayMemberPath="Name"
-                                          Height="38" Background="#1A1A1A" Foreground="White" Padding="10"
+                                          Height="38" Padding="10"
                                           Margin="0,0,0,10">
-                                    <ComboBox.ItemContainerStyle>
-                                        <Style TargetType="ComboBoxItem" BasedOn="{StaticResource ComboBoxItemStyle}">
-                                            <Setter Property="Tag" Value="{Binding Id}"/>
-                                        </Style>
-                                    </ComboBox.ItemContainerStyle>
                                     <ComboBox.InputBindings>
                                         <MouseBinding MouseAction="LeftClick" 
                                                       Command="{Binding DataContext.SwitchProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -290,61 +149,25 @@
                                     </Grid.ColumnDefinitions>
                                     
                                     <!-- Yeni Profil -->
-                                    <Button Grid.Column="0" Command="{Binding CreateProfileCommand}"
+                                    <ui:Button Grid.Column="0" Command="{Binding CreateProfileCommand}"
                                             ToolTip="Yeni Profil Oluştur"
-                                            Background="#2A2A2A" Foreground="#4CC2FF" 
-                                            BorderThickness="0" Cursor="Hand" Margin="0,0,3,0" Height="32">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="8,4">
-                                                    <TextBlock Text="➕" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#3A3A3A"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
+                                            Appearance="Secondary"
+                                            Icon="{ui:SymbolIcon Add24}"
+                                            Margin="0,0,3,0" Height="32"/>
                                     
                                     <!-- Kopyala -->
-                                    <Button Grid.Column="1" Command="{Binding DuplicateProfileCommand}"
+                                    <ui:Button Grid.Column="1" Command="{Binding DuplicateProfileCommand}"
                                             ToolTip="Profili Kopyala"
-                                            Background="#2A2A2A" Foreground="#4CC2FF" 
-                                            BorderThickness="0" Cursor="Hand" Margin="3,0,3,0" Height="32">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="8,4">
-                                                    <TextBlock Text="📋" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#3A3A3A"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
+                                            Appearance="Secondary"
+                                            Icon="{ui:SymbolIcon Copy24}"
+                                            Margin="3,0,3,0" Height="32"/>
                                     
                                     <!-- Sil -->
-                                    <Button Grid.Column="2" Command="{Binding DeleteProfileCommand}"
+                                    <ui:Button Grid.Column="2" Command="{Binding DeleteProfileCommand}"
                                             ToolTip="Profili Sil"
-                                            Background="#2A2A2A" Foreground="#FF5252" 
-                                            BorderThickness="0" Cursor="Hand" Margin="3,0,0,0" Height="32">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="8,4">
-                                                    <TextBlock Text="🗑️" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#3A2A2A"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
+                                            Appearance="Danger"
+                                            Icon="{ui:SymbolIcon Delete24}"
+                                            Margin="3,0,0,0" Height="32"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -396,12 +219,12 @@
                                   SelectedValue="{Binding SelectedButtonSize}" 
                                   SelectedValuePath="Value" 
                                   DisplayMemberPath="Key"
-                                  Height="40" Background="{StaticResource BgInput}" Foreground="White" Padding="10"/>
+                                  Height="40" Padding="10"/>
 
                         <Separator Background="#333" Margin="0,20"/>
 
                         <!-- Manuel Kaydet Butonu -->
-                        <Button Command="{Binding SaveAndCloseCommand}" Style="{StaticResource PrimaryBtn}">
+                        <ui:Button Command="{Binding SaveAndCloseCommand}" Style="{StaticResource PrimaryBtn}">
                             <TextBlock Text="{Binding SaveButtonText}" FontWeight="SemiBold" FontSize="13">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -409,7 +232,7 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                        </Button>
+                        </ui:Button>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
@@ -652,10 +475,9 @@
 
                             <!-- Arama Çubuğu -->
                             <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <TextBox x:Name="SearchBox"
+                                <ui:TextBox x:Name="SearchBox"
                                          Text="{Binding LibrarySearchText, UpdateSourceTrigger=PropertyChanged}"
-                                         Background="{StaticResource BgInput}"
-                                         Foreground="White"
+                                         PlaceholderText="Şablon ara..."
                                          Padding="32,10,10,10"
                                          VerticalAlignment="Center"/>
                                 <!-- Arama İkonu -->
@@ -684,8 +506,6 @@
                                       ItemsSource="{Binding LibraryCategories}"
                                       SelectedItem="{Binding SelectedCategory}"
                                       Height="35" 
-                                      Background="{StaticResource BgInput}" 
-                                      Foreground="White" 
                                       Padding="10"
                                       Margin="0,0,0,10"/>
 
@@ -831,36 +651,36 @@
                                         <!-- İkon Seçici Butonları -->
                                         <StackPanel Grid.Column="1">
                                             <!-- İkon Kodu Girişi -->
-                                            <TextBox Text="{Binding Icon, UpdateSourceTrigger=PropertyChanged}" 
+                                            <ui:TextBox Text="{Binding Icon, UpdateSourceTrigger=PropertyChanged}" 
                                                      Height="30" FontFamily="Segoe MDL2 Assets" FontSize="16"
-                                                     ToolTip="Segoe MDL2 ikon kodu (örn: )"
+                                                     PlaceholderText="🎨 İkon kodu (Segoe MDL2)"
                                                      Margin="0,0,0,5"/>
                                             
                                             <!-- Hızlı İkon Butonları -->
                                             <WrapPanel>
-                                                <Button Content="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                <ui:Button Content="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                         Width="28" Height="28" Margin="0,0,3,3"
-                                                        Background="#2A2A2A" Foreground="White" BorderThickness="0" Cursor="Hand"
+                                                        Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE768;" ToolTip="Play"/>
-                                                <Button Content="&#xE74F;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                <ui:Button Content="&#xE74F;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                         Width="28" Height="28" Margin="0,0,3,3"
-                                                        Background="#2A2A2A" Foreground="White" BorderThickness="0" Cursor="Hand"
+                                                        Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE74F;" ToolTip="Mute"/>
-                                                <Button Content="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                <ui:Button Content="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                         Width="28" Height="28" Margin="0,0,3,3"
-                                                        Background="#2A2A2A" Foreground="White" BorderThickness="0" Cursor="Hand"
+                                                        Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE721;" ToolTip="Globe"/>
-                                                <Button Content="&#xE8EF;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                <ui:Button Content="&#xE8EF;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                         Width="28" Height="28" Margin="0,0,3,3"
-                                                        Background="#2A2A2A" Foreground="White" BorderThickness="0" Cursor="Hand"
+                                                        Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE8EF;" ToolTip="Calculator"/>
-                                                <Button Content="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                <ui:Button Content="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                         Width="28" Height="28" Margin="0,0,3,3"
-                                                        Background="#2A2A2A" Foreground="White" BorderThickness="0" Cursor="Hand"
+                                                        Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE713;" ToolTip="Settings"/>
-                                                <Button Content="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                <ui:Button Content="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                         Width="28" Height="28" Margin="0,0,3,3"
-                                                        Background="#2A2A2A" Foreground="White" BorderThickness="0" Cursor="Hand"
+                                                        Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE7E8;" ToolTip="Power"/>
                                             </WrapPanel>
                                         </StackPanel>
@@ -868,7 +688,7 @@
 
                                     <!-- Başlık -->
                                     <TextBlock Text="Başlık" Style="{StaticResource Label}" Margin="0,0,0,5"/>
-                                    <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <ui:TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
 
                                     <!-- Renk -->
                                     <TextBlock Text="Renk (Hex)" Style="{StaticResource Label}"/>
@@ -878,7 +698,7 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Border Background="{Binding Color}" CornerRadius="6" Margin="0,0,10,0" BorderBrush="#555" BorderThickness="1"/>
-                                        <TextBox Grid.Column="1" Text="{Binding Color, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <ui:TextBox Grid.Column="1" Text="{Binding Color, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Grid>
 
                                     <Separator Background="#333" Margin="0,10,0,15"/>
@@ -887,12 +707,12 @@
                                     <TextBlock Text="Aksiyon Tipi" Style="{StaticResource Label}"/>
                                     <ComboBox ItemsSource="{Binding DataContext.ActionTypes, RelativeSource={RelativeSource AncestorType=Window}}"
                                               SelectedItem="{Binding ActionType}"
-                                              Height="40" Background="{StaticResource BgInput}" Foreground="White" Padding="10"/>
+                                              Height="40" Padding="10"/>
 
                                     <!-- Buton Davranışı -->
                                     <TextBlock Text="Buton Davranışı" Style="{StaticResource Label}"/>
                                     <ComboBox SelectedItem="{Binding BehaviorType, UpdateSourceTrigger=PropertyChanged}"
-                                              Height="40" Background="{StaticResource BgInput}" Foreground="White" Padding="10">
+                                              Height="40" Padding="10">
                                         <System:String xmlns:System="clr-namespace:System;assembly=mscorlib">Push</System:String>
                                         <System:String xmlns:System="clr-namespace:System;assembly=mscorlib">Toggle</System:String>
                                     </ComboBox>
@@ -912,7 +732,7 @@
                                     <TextBlock Text="Komut / Dosya Yolu" Style="{StaticResource Label}"/>
                                     
                                     <!-- ==================== EXECUTE & WEBSITE: Basit TextBox ==================== -->
-                                    <TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" 
+                                    <ui:TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" 
                                              Height="40" VerticalContentAlignment="Center"
                                              Visibility="{Binding ActionType, Converter={StaticResource ActionToSimpleVis}}"/>
                                     
@@ -922,7 +742,7 @@
                                                   SelectedValue="{Binding Command}"
                                                   SelectedValuePath="Value"
                                                   DisplayMemberPath="DisplayText"
-                                                  Height="40" Background="{StaticResource BgInput}" Foreground="White" Padding="10"/>
+                                                  Height="40" Padding="10"/>
                                     </StackPanel>
                                     
                                     <!-- ==================== AUDIO CONTROL: Dropdown ==================== -->
@@ -931,7 +751,7 @@
                                                   SelectedValue="{Binding Command}"
                                                   SelectedValuePath="Value"
                                                   DisplayMemberPath="DisplayText"
-                                                  Height="40" Background="{StaticResource BgInput}" Foreground="White" Padding="10"/>
+                                                  Height="40" Padding="10"/>
                                     </StackPanel>
                                     
                                     <!-- ==================== HOTKEY: Dropdown + Özel Giriş ==================== -->
@@ -941,39 +761,18 @@
                                                   SelectedValue="{Binding Command}"
                                                   SelectedValuePath="Value"
                                                   DisplayMemberPath="DisplayText"
-                                                  Height="40" Background="{StaticResource BgInput}" Foreground="White" Padding="10"
+                                                  Height="40" Padding="10"
                                                   Margin="0,0,0,8"/>
                                         
                                         <!-- Özel Kombinasyon Girişi -->
-                                        <Grid>
-                                            <TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" 
+                                        <ui:TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" 
                                                      Height="40" VerticalContentAlignment="Center"
-                                                     ToolTip="Örn: CTRL+SHIFT+N, ALT+F4, WIN+R"/>
-                                            <!-- Placeholder -->
-                                            <TextBlock Text="Özel: CTRL+SHIFT+N veya hazır seçin" 
-                                                       Foreground="#555" FontSize="12" 
-                                                       VerticalAlignment="Center" Margin="12,0,0,0"
-                                                       IsHitTestVisible="False">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Command}" Value="">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Command}" Value="{x:Null}">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Grid>
+                                                     PlaceholderText="Özel: CTRL+SHIFT+N veya hazır seçin"/>
                                     </StackPanel>
                                     
                                     <!-- ==================== TEXT TYPE: Büyük TextArea ==================== -->
                                     <StackPanel Visibility="{Binding ActionType, Converter={StaticResource ActionToVisibility}, ConverterParameter=TextType}">
-                                        <TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" 
+                                        <ui:TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" 
                                                  Height="100" TextWrapping="Wrap" 
                                                  VerticalContentAlignment="Top" 
                                                  AcceptsReturn="True"
