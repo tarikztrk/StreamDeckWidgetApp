@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 using Wpf.Ui.Controls;
 using StreamDeckWidgetApp.Models;
 using StreamDeckWidgetApp.ViewModels;
@@ -91,3 +92,4 @@ public partial class MainWindow : FluentWindow
         }
     }
 }
+

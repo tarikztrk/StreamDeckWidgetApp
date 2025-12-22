@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:converters="clr-namespace:StreamDeckWidgetApp.Core.Converters"
-        xmlns:behaviors="clr-namespace:StreamDeckWidgetApp.Core.Behaviors"
         mc:Ignorable="d"
         Title="Stream Deck Control Center" 
         Width="1100" Height="700"
@@ -104,13 +103,28 @@
         <!-- WPF UI ComboBox uses native styling -->
     </ui:FluentWindow.Resources>
 
-    <!-- ANA TASARIM - FluentWindow Mica efektini otomatik kullanır -->
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280"/> <!-- SOL PANEL: AYARLAR -->
-            <ColumnDefinition Width="*"/>   <!-- ORTA: ÖNİZLEME -->
-            <ColumnDefinition Width="300"/> <!-- SAĞ PANEL: TAB (KÜTÜPHANE + ÖZELLİKLER) -->
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- TITLE BAR -->
+        <ui:TitleBar Grid.Row="0"
+                     Title="Stream Deck Control Center"
+                     Icon="Placeholder"
+                     ShowMaximize="True"
+                     ShowMinimize="True"
+                     ShowHelp="False">
+        </ui:TitleBar>
+
+        <!-- ANA TASARIM -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"/> <!-- SOL PANEL: AYARLAR -->
+                <ColumnDefinition Width="*"/>   <!-- ORTA: ÖNİZLEME -->
+                <ColumnDefinition Width="300"/> <!-- SAĞ PANEL: TAB (KÜTÜPHANE + ÖZELLİKLER) -->
+            </Grid.ColumnDefinitions>
 
         <!-- FluentWindow otomatik olarak title bar sağlar -->
 
@@ -131,7 +145,7 @@
                                 <ComboBox ItemsSource="{Binding Profiles}"
                                           SelectedItem="{Binding CurrentProfile, Mode=OneWay}"
                                           DisplayMemberPath="Name"
-                                          Height="38" Padding="10"
+                                          Height="Auto" Padding="10"
                                           Margin="0,0,0,10">
                                     <ComboBox.InputBindings>
                                         <MouseBinding MouseAction="LeftClick" 
@@ -221,17 +235,11 @@
                                   DisplayMemberPath="Key"
                                   Height="40" Padding="10"/>
 
-                        <Separator Background="#333" Margin="0,20"/>
+                        <Separator Background="#333" Margin="0,5"/>
 
                         <!-- Manuel Kaydet Butonu -->
-                        <ui:Button Command="{Binding SaveAndCloseCommand}" Style="{StaticResource PrimaryBtn}">
-                            <TextBlock Text="{Binding SaveButtonText}" FontWeight="SemiBold" FontSize="13">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="#121212"/>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                        <ui:Button Command="{Binding SaveAndCloseCommand}" Style="{StaticResource PrimaryBtn}" Content="{Binding SaveButtonText}" >
+                            
                         </ui:Button>
                     </StackPanel>
                 </ScrollViewer>
@@ -484,28 +492,14 @@
                                 <TextBlock Text="🔍" FontSize="14" Foreground="#555" 
                                            VerticalAlignment="Center" Margin="10,0,0,0"
                                            IsHitTestVisible="False"/>
-                                <!-- Placeholder Metin -->
-                                <TextBlock Text="Şablon ara..." FontSize="13" Foreground="#555" 
-                                           VerticalAlignment="Center" Margin="32,0,0,0"
-                                           IsHitTestVisible="False">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                              
                             </Grid>
 
                             <!-- Kategori Filtresi -->
                             <ComboBox Grid.Row="1"
                                       ItemsSource="{Binding LibraryCategories}"
                                       SelectedItem="{Binding SelectedCategory}"
-                                      Height="35" 
+                                      Height="Auto" 
                                       Padding="10"
                                       Margin="0,0,0,10"/>
 
@@ -797,4 +791,5 @@
                 </TabControl>
             </Border>
         </Grid>
+    </Grid>
 </ui:FluentWindow>

@@ -5,7 +5,6 @@
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  xmlns:converters="clr-namespace:StreamDeckWidgetApp.Core.Converters"
-                 xmlns:behaviors="clr-namespace:StreamDeckWidgetApp.Core.Behaviors"
                  mc:Ignorable="d"
                  Title="Virtual Deck"
                  SizeToContent="WidthAndHeight"

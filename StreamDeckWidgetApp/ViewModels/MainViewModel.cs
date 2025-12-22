@@ -87,7 +87,6 @@ public class MainViewModel : ObservableObject
     // Seçenekler (Display Name -> Pixel Size)
     public Dictionary<string, int> ButtonSizeOptions { get; } = new()
     {
-        { "Küçük (32px)", 45 }, // 32px buton + boşluk payı
         { "Orta (48px)", 65 },  // 48px buton + boşluk payı
         { "Büyük (64px)", 85 }  // 64px buton + boşluk payı
     };
