@@ -17,6 +17,34 @@ public partial class EditorWindow : FluentWindow
         DataContext = viewModel;
     }
 
+    private void EditorWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Layout'u zorla güncelle - MainWindow'daki gibi ilk açılışta odak/yerleşim sorununu düzeltir
+        Dispatcher.InvokeAsync(() =>
+        {
+            InvalidateMeasure();
+            InvalidateArrange();
+            UpdateLayout();
+            
+            this.Activate(); // Pencereyi öne getir ve odakla
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Left)
+        {
+            this.DragMove();
+        }
+    }
+
+    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        // IsActive kontrolünü kaldırdık - her tıklamada zorla aktif et
+        this.Activate();
+        this.Focus();
+    }
+
     /// <summary>
     /// Kütüphane listesinden preset sürükleme başlangıcı
     /// </summary>

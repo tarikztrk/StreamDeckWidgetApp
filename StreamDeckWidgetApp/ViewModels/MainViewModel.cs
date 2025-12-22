@@ -456,6 +456,9 @@ public class MainViewModel : ObservableObject
             editorViewModel.SetWindow(_editorWindow);
             _editorWindow.DataContext = editorViewModel;
             
+            // Pencere sahipliğini ayarla (Taskbar/Alt-Tab davranışı için kritik)
+            _editorWindow.Owner = _mainWindow;
+            
             // Pencere kapanınca referansı temizle ve Widget'ı göster
             _editorWindow.Closed += (s, e) => OnEditorClosed();
 

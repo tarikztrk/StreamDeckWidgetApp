@@ -11,7 +11,9 @@
         MinHeight="600" MinWidth="900"
         WindowBackdropType="Mica"
         ExtendsContentIntoTitleBar="True"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Loaded="EditorWindow_Loaded"
+        PreviewMouseDown="Window_PreviewMouseDown">
 
     <ui:FluentWindow.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -112,10 +114,11 @@
         <!-- TITLE BAR -->
         <ui:TitleBar Grid.Row="0"
                      Title="Stream Deck Control Center"
-                     Icon="Placeholder"
+                     Height="32"
                      ShowMaximize="True"
                      ShowMinimize="True"
-                     ShowHelp="False">
+                     ShowHelp="False"
+                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
         </ui:TitleBar>
 
         <!-- ANA TASARIM -->
