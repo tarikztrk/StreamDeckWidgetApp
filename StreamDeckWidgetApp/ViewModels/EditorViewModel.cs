@@ -75,7 +75,7 @@ public class EditorViewModel : ObservableObject
     public ObservableCollection<DeckItem> DeckItems => _mainViewModel.DeckItems;
     
     // --- Profile Properties (Proxy from MainViewModel) ---
-    public ObservableCollection<Profile> Profiles => _mainViewModel.Profiles;
+    public IReadOnlyList<Profile> Profiles => _mainViewModel.Profiles;
     public Profile CurrentProfile => _mainViewModel.CurrentProfile;
     
     public string CurrentProfileName
@@ -309,6 +309,5 @@ public class EditorViewModel : ObservableObject
     private void CloseEditor()
     {
         _editorWindow?.Close();
-        _mainViewModel.OnEditorClosed();
     }
 }

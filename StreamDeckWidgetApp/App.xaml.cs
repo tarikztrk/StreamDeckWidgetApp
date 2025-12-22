@@ -21,6 +21,9 @@ public partial class App : Application
                 // Servis Katmanı Kayıtları
                 services.AddSingleton<IActionService, ActionService>();
                 services.AddSingleton<IConfigService, JsonConfigService>();
+                services.AddSingleton<IProfileService, ProfileService>();
+                services.AddSingleton<IGridService, GridService>();
+                services.AddSingleton<IEditorWindowService, EditorWindowService>();
 
                 // ViewModel'leri Kayıt Et
                 services.AddSingleton<MainViewModel>();

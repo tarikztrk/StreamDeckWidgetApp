@@ -377,38 +377,7 @@
                                                                         </TextBlock.Style>
                                                                     </TextBlock>
                                                                     
-                                                                    <!-- Metin için gradient overlay (ikon bütünlüğü korunur) -->
-                                                                    <Border VerticalAlignment="Bottom" HorizontalAlignment="Stretch" 
-                                                                            CornerRadius="0,0,6,6" Padding="4,8,4,4" Height="32">
-                                                                        <Border.Background>
-                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                <GradientStop Color="Transparent" Offset="0"/>
-                                                                                <GradientStop Color="#AA000000" Offset="0.4"/>
-                                                                                <GradientStop Color="#DD000000" Offset="1"/>
-                                                                            </LinearGradientBrush>
-                                                                        </Border.Background>
-                                                                        <Border.Style>
-                                                                            <Style TargetType="Border">
-                                                                                <Style.Triggers>
-                                                                                    <DataTrigger Binding="{Binding Title}" Value="Boş">
-                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                                    </DataTrigger>
-                                                                                </Style.Triggers>
-                                                                            </Style>
-                                                                        </Border.Style>
-                                                                        <TextBlock Text="{Binding Title}" 
-                                                                                   Foreground="White" 
-                                                                                   FontWeight="Bold" FontSize="11"
-                                                                                   HorizontalAlignment="Center" 
-                                                                                   VerticalAlignment="Bottom"
-                                                                                   TextWrapping="NoWrap" 
-                                                                                   TextTrimming="CharacterEllipsis"
-                                                                                   TextAlignment="Center">
-                                                                            <TextBlock.Effect>
-                                                                                <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.9" Color="#000"/>
-                                                                            </TextBlock.Effect>
-                                                                        </TextBlock>
-                                                                    </Border>
+                                                                   
                                                                 </Grid>
                                                             </Border>
                                                             <ControlTemplate.Triggers>
@@ -649,34 +618,34 @@
                                         <StackPanel Grid.Column="1">
                                             <!-- İkon Kodu Girişi -->
                                             <ui:TextBox Text="{Binding Icon, UpdateSourceTrigger=PropertyChanged}" 
-                                                     Height="30" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                                     Height="Auto" FontFamily="Segoe MDL2 Assets" FontSize="16"
                                                      PlaceholderText="🎨 İkon kodu (Segoe MDL2)"
                                                      Margin="0,0,0,5"/>
                                             
                                             <!-- Hızlı İkon Butonları -->
                                             <WrapPanel>
                                                 <ui:Button Content="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                                        Width="28" Height="28" Margin="0,0,3,3"
+                                                        Width="Auto" Height="Auto" Margin="0,0,3,3"
                                                         Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE768;" ToolTip="Play"/>
                                                 <ui:Button Content="&#xE74F;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                                        Width="28" Height="28" Margin="0,0,3,3"
+                                                        Width="Auto" Height="Auto" Margin="0,0,3,3"
                                                         Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE74F;" ToolTip="Mute"/>
                                                 <ui:Button Content="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                                        Width="28" Height="28" Margin="0,0,3,3"
+                                                       Width="Auto" Height="Auto" Margin="0,0,3,3"
                                                         Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE721;" ToolTip="Globe"/>
                                                 <ui:Button Content="&#xE8EF;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                                        Width="28" Height="28" Margin="0,0,3,3"
+                                                        Width="Auto" Height="Auto" Margin="0,0,3,3"
                                                         Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE8EF;" ToolTip="Calculator"/>
                                                 <ui:Button Content="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                                        Width="28" Height="28" Margin="0,0,3,3"
+                                                        Width="Auto" Height="Auto" Margin="0,0,3,3"
                                                         Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE713;" ToolTip="Settings"/>
                                                 <ui:Button Content="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                                        Width="28" Height="28" Margin="0,0,3,3"
+                                                       Width="Auto" Height="Auto" Margin="0,0,3,3"
                                                         Appearance="Secondary"
                                                         Click="QuickIcon_Click" Tag="&#xE7E8;" ToolTip="Power"/>
                                             </WrapPanel>
@@ -685,7 +654,7 @@
 
                                     <!-- Başlık -->
                                     <TextBlock Text="Başlık" Style="{StaticResource Label}" Margin="0,0,0,5"/>
-                                    <ui:TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <ui:TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
 
                                     <!-- Renk -->
                                     <TextBlock Text="Renk (Hex)" Style="{StaticResource Label}"/>
@@ -698,7 +667,7 @@
                                         <ui:TextBox Grid.Column="1" Text="{Binding Color, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Grid>
 
-                                    <Separator Background="#333" Margin="0,10,0,15"/>
+                                    <Separator Background="#333" Margin="0,5,0,0"/>
 
                                     <!-- Aksiyon Tipi -->
                                     <TextBlock Text="Aksiyon Tipi" Style="{StaticResource Label}"/>

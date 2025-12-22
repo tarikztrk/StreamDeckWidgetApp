@@ -6,118 +6,104 @@ using StreamDeckWidgetApp.Core;
 using StreamDeckWidgetApp.Core.Helpers;
 using StreamDeckWidgetApp.Models;
 using StreamDeckWidgetApp.Services;
-using StreamDeckWidgetApp.Views;
 
 namespace StreamDeckWidgetApp.ViewModels;
 
 public class MainViewModel : ObservableObject
 {
-        // Maksimum sınırlar
-        private const int MaxRows = 8;
-        private const int MaxColumns = 10;
-
     private readonly IActionService _actionService;
-    private readonly IConfigService _configService;
-    private readonly Func<EditorViewModel> _editorViewModelFactory;
-    private readonly Func<EditorWindow> _editorWindowFactory;
-    private Profile _currentProfile = null!;
-    private Window? _mainWindow; // Widget penceresi referansı
+    private readonly IProfileService _profileService;
+    private readonly IGridService _gridService;
+    private readonly IEditorWindowService _editorWindowService;
 
     // --- State Properties ---
     
-    // Editör penceresinin referansı (Aynı anda sadece 1 tane açık olsun)
-    private EditorWindow? _editorWindow;
-
-    // Editör açık mı? (Widget butonlarına basınca işlem mi yapsın, seçim mi?)
-    public bool IsEditorOpen => _editorWindow != null;
-
     private DeckItem? _selectedDeckItem;
     public DeckItem? SelectedDeckItem
     {
         get => _selectedDeckItem;
         set
         {
-            // Önceki seçimi temizle
+            // Clear previous selection
             if (_selectedDeckItem != null)
                 _selectedDeckItem.IsSelected = false;
             
             SetField(ref _selectedDeckItem, value);
             
-            // Yeni seçimi işaretle
+            // Mark new selection
             if (_selectedDeckItem != null)
                 _selectedDeckItem.IsSelected = true;
         }
     }
     
-    // Grid Boyutları - Dinamik Olarak Değiştirilebilir
+    // Grid Dimensions - Dynamically changeable
     public int Rows
     {
-        get => _currentProfile.Rows;
+        get => _profileService.CurrentProfile.Rows;
         set
         {
-            // Clamp değeri 1..MaxRows aralığına getir
-            int newVal = Math.Clamp(value, 1, MaxRows);
-            if (_currentProfile.Rows != newVal)
+            int newVal = _gridService.ClampRows(value);
+            if (_profileService.CurrentProfile.Rows != newVal)
             {
-                _currentProfile.Rows = newVal;
+                _profileService.CurrentProfile.Rows = newVal;
                 OnPropertyChanged();
-                RefreshGrid(); // Grid boyutunu yeniden hesapla
-                 
+                _gridService.RefreshGrid(_profileService.CurrentProfile);
             }
         }
     }
 
     public int Columns
     {
-        get => _currentProfile.Columns;
+        get => _profileService.CurrentProfile.Columns;
         set
         {
-            // Clamp değeri 1..MaxColumns aralığına getir
-            int newVal = Math.Clamp(value, 1, MaxColumns);
-            if (_currentProfile.Columns != newVal)
+            int newVal = _gridService.ClampColumns(value);
+            if (_profileService.CurrentProfile.Columns != newVal)
             {
-                _currentProfile.Columns = newVal;
+                _profileService.CurrentProfile.Columns = newVal;
                 OnPropertyChanged();
-                RefreshGrid(); // Grid boyutunu yeniden hesapla
-                 
+                _gridService.RefreshGrid(_profileService.CurrentProfile);
             }
         }
     }
     
-    // Seçenekler (Display Name -> Pixel Size)
+    // Button size options (Display Name -> Pixel Size)
     public Dictionary<string, int> ButtonSizeOptions { get; } = new()
     {
-        { "Orta (48px)", 65 },  // 48px buton + boşluk payı
-        { "Büyük (64px)", 85 }  // 64px buton + boşluk payı
+        { "Orta (48px)", 65 },
+        { "Büyük (64px)", 85 }
     };
 
-    // Aktif Buton Boyutu
+    // Active button size
     public int SelectedButtonSize
     {
-        get => _currentProfile.ButtonSize;
+        get => _profileService.CurrentProfile.ButtonSize;
         set
         {
-            if (_currentProfile.ButtonSize != value)
+            if (_profileService.CurrentProfile.ButtonSize != value)
             {
-                _currentProfile.ButtonSize = value;
+                _profileService.CurrentProfile.ButtonSize = value;
                 OnPropertyChanged();
-                 
             }
         }
     }
 
-    // ComboBox için Action Tipleri
+    // Action types for ComboBox
     public List<string> ActionTypes { get; } = new() 
     { 
-        "Execute",      // Uygulama/Program Çalıştır
-        "Hotkey",       // Klavye Kısayolu
-        "Website",      // Web Sitesi Aç
-        "MediaControl", // Medya Kontrol (Play/Pause/Next/Prev)
-        "AudioControl", // Ses Kontrol (Mute/Vol+/Vol-)
-        "TextType"      // Metin Yaz
+        "Execute",
+        "Hotkey",
+        "Website",
+        "MediaControl",
+        "AudioControl",
+        "TextType"
     };
 
-    public ObservableCollection<DeckItem> DeckItems { get; set; }
+    // DeckItems - proxied from GridService
+    public ObservableCollection<DeckItem> DeckItems => _gridService.DeckItems;
+
+    // Editor open state - proxied from EditorWindowService
+    public bool IsEditorOpen => _editorWindowService.IsEditorOpen;
     
     // --- Preset Library ---
     private ObservableCollection<PresetModel> _libraryItems;
@@ -155,25 +141,18 @@ public class MainViewModel : ObservableObject
     
     public List<string> LibraryCategories { get; } = new() { "Tümü" };
 
-    // --- Profile Management ---
-    private ObservableCollection<Profile> _profiles = new();
-    public ObservableCollection<Profile> Profiles
-    {
-        get => _profiles;
-        set => SetField(ref _profiles, value);
-    }
-    
-    public Profile CurrentProfile => _currentProfile;
+    // --- Profile Properties (proxied from ProfileService) ---
+    public IReadOnlyList<Profile> Profiles => _profileService.Profiles;
+    public Profile CurrentProfile => _profileService.CurrentProfile;
     
     public string CurrentProfileName
     {
-        get => _currentProfile?.Name ?? "Profil";
+        get => _profileService.CurrentProfile?.Name ?? "Profil";
         set
         {
-            if (_currentProfile != null && _currentProfile.Name != value)
+            if (_profileService.CurrentProfile != null && _profileService.CurrentProfile.Name != value)
             {
-                _configService.RenameProfile(_currentProfile.Id, value);
-                _currentProfile.Name = value;
+                _profileService.RenameCurrentProfile(value);
                 OnPropertyChanged();
             }
         }
@@ -191,114 +170,100 @@ public class MainViewModel : ObservableObject
 
     public MainViewModel(
         IActionService actionService, 
-        IConfigService configService,
-        Func<EditorViewModel> editorViewModelFactory,
-        Func<EditorWindow> editorWindowFactory)
+        IProfileService profileService,
+        IGridService gridService,
+        IEditorWindowService editorWindowService)
     {
         _actionService = actionService;
-        _configService = configService;
-        _editorViewModelFactory = editorViewModelFactory;
-        _editorWindowFactory = editorWindowFactory;
-        DeckItems = new ObservableCollection<DeckItem>();
+        _profileService = profileService;
+        _gridService = gridService;
+        _editorWindowService = editorWindowService;
         _libraryItems = new ObservableCollection<PresetModel>();
         
-        // Kütüphane kategorilerini yükle
+        // Load library categories
         LibraryCategories.AddRange(PresetService.GetCategories());
         
-        LoadData();
+        // Subscribe to service events
+        _profileService.ProfileChanged += OnProfileChanged;
+        _gridService.GridRefreshed += OnGridRefreshed;
+        _editorWindowService.EditorClosed += OnEditorClosed;
+        
+        // Initial grid refresh
+        _gridService.RefreshGrid(_profileService.CurrentProfile);
 
+        // Commands
         ItemClickCommand = new RelayCommand(OnItemClick);
         CloseAppCommand = new RelayCommand(_ => 
         {
             SaveChanges();
             Application.Current.Shutdown();
         });
-        
-        // Editör Penceresini Aç
         OpenEditorCommand = new RelayCommand(_ => OpenEditor());
-        
-        // Değişiklikleri Kaydet
         SaveCommand = new RelayCommand(_ => SaveChanges());
         
-        // Profil Komutları
-        SwitchProfileCommand = new RelayCommand(profileId => SwitchProfile(profileId as string));
-        CreateProfileCommand = new RelayCommand(_ => CreateNewProfile());
+        // Profile commands
+        SwitchProfileCommand = new RelayCommand(profileId => _profileService.SwitchProfile(profileId as string ?? ""));
+        CreateProfileCommand = new RelayCommand(_ => _profileService.CreateProfile($"Profil {Profiles.Count + 1}"));
         DeleteProfileCommand = new RelayCommand(_ => DeleteCurrentProfile());
-        DuplicateProfileCommand = new RelayCommand(_ => DuplicateCurrentProfile());
+        DuplicateProfileCommand = new RelayCommand(_ => _profileService.DuplicateCurrentProfile($"{CurrentProfile.Name} (Kopya)"));
         
-        // Kütüphaneyi ilk yükle
+        // Load library
         LoadLibrary();
-        
     }
 
-    private void LoadData()
+    // --- Event Handlers ---
+    
+    private void OnProfileChanged()
     {
-        _currentProfile = _configService.LoadProfile();
+        // Refresh UI when profile changes
+        OnPropertyChanged(nameof(Rows));
+        OnPropertyChanged(nameof(Columns));
+        OnPropertyChanged(nameof(SelectedButtonSize));
+        OnPropertyChanged(nameof(CurrentProfileName));
+        OnPropertyChanged(nameof(CurrentProfile));
+        OnPropertyChanged(nameof(Profiles));
         
-        // Eğer eski profillerde boyut yoksa varsayılanı ata
-        if (_currentProfile.ButtonSize == 0) _currentProfile.ButtonSize = 85;
-        
-        // Profil listesini yükle
-        LoadProfiles();
-        
-        // Veri yüklendikten sonra Grid'i olması gereken sayıya tamamla
-        RefreshGrid();
+        _gridService.RefreshGrid(_profileService.CurrentProfile);
     }
     
-    private void LoadProfiles()
+    private void OnGridRefreshed()
     {
-        Profiles.Clear();
-        foreach (var profile in _configService.GetAllProfiles())
+        OnPropertyChanged(nameof(DeckItems));
+        OnPropertyChanged(nameof(Rows));
+        OnPropertyChanged(nameof(Columns));
+    }
+    
+    private void OnEditorClosed()
+    {
+        SelectedDeckItem = null;
+        OnPropertyChanged(nameof(IsEditorOpen));
+    }
+
+    // --- Private Methods ---
+    
+    private void OnItemClick(object? parameter)
+    {
+        if (parameter is DeckItem item)
         {
-            Profiles.Add(profile);
+            if (IsEditorOpen)
+            {
+                SelectedDeckItem = item;
+            }
+            else
+            {
+                if (item.BehaviorType == "Toggle")
+                {
+                    item.IsActive = !item.IsActive;
+                }
+                _actionService.ExecuteItem(item);
+            }
         }
     }
-    
-    private void SwitchProfile(string? profileId)
+
+    private void OpenEditor()
     {
-        if (string.IsNullOrEmpty(profileId) || profileId == _currentProfile.Id) return;
-        
-        // Mevcut profili kaydet
-        SaveChanges();
-        
-        // Yeni profile geç
-        _configService.SetActiveProfile(profileId);
-        _currentProfile = _configService.LoadProfile();
-        
-        // UI'ı güncelle
-        OnPropertyChanged(nameof(Rows));
-        OnPropertyChanged(nameof(Columns));
-        OnPropertyChanged(nameof(SelectedButtonSize));
-        OnPropertyChanged(nameof(CurrentProfileName));
-        OnPropertyChanged(nameof(CurrentProfile));
-        
-        RefreshGrid();
-        
-        LoadProfiles();
-    }
-    
-    private void CreateNewProfile()
-    {
-        // Mevcut profili kaydet
-        SaveChanges();
-        
-        // Yeni profil oluştur
-        var newProfile = _configService.CreateProfile($"Profil {Profiles.Count + 1}");
-        
-        // Yeni profile geç
-        _configService.SetActiveProfile(newProfile.Id);
-        _currentProfile = newProfile;
-        
-        // UI'ı güncelle
-        OnPropertyChanged(nameof(Rows));
-        OnPropertyChanged(nameof(Columns));
-        OnPropertyChanged(nameof(SelectedButtonSize));
-        OnPropertyChanged(nameof(CurrentProfileName));
-        OnPropertyChanged(nameof(CurrentProfile));
-        
-        RefreshGrid();
-        
-        LoadProfiles();
+        _editorWindowService.OpenEditor();
+        OnPropertyChanged(nameof(IsEditorOpen));
     }
     
     private void DeleteCurrentProfile()
@@ -310,212 +275,27 @@ public class MainViewModel : ObservableObject
         }
         
         var result = MessageBox.Show(
-            $"\"{_currentProfile.Name}\" profili silinecek. Emin misiniz?",
+            $"\"{CurrentProfile.Name}\" profili silinecek. Emin misiniz?",
             "Profil Sil",
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
         
-        if (result != MessageBoxResult.Yes) return;
-        
-        var profileIdToDelete = _currentProfile.Id;
-        _configService.DeleteProfile(profileIdToDelete);
-        
-        // Yeni aktif profili yükle
-        _currentProfile = _configService.LoadProfile();
-        
-        // UI'ı güncelle
-        OnPropertyChanged(nameof(Rows));
-        OnPropertyChanged(nameof(Columns));
-        OnPropertyChanged(nameof(SelectedButtonSize));
-        OnPropertyChanged(nameof(CurrentProfileName));
-        OnPropertyChanged(nameof(CurrentProfile));
-        
-        RefreshGrid();
-        
-        LoadProfiles();
-    }
-    
-    private void DuplicateCurrentProfile()
-    {
-        var duplicated = _configService.DuplicateProfile(_currentProfile.Id, $"{_currentProfile.Name} (Kopya)");
-        
-        // Kopyalanan profile geç
-        _configService.SetActiveProfile(duplicated.Id);
-        _currentProfile = duplicated;
-        
-        // UI'ı güncelle
-        OnPropertyChanged(nameof(Rows));
-        OnPropertyChanged(nameof(Columns));
-        OnPropertyChanged(nameof(SelectedButtonSize));
-        OnPropertyChanged(nameof(CurrentProfileName));
-        OnPropertyChanged(nameof(CurrentProfile));
-        
-        RefreshGrid();
-        
-        LoadProfiles();
-    }
-
-    // Buton listesini yeni boyutlara g�re ayarlar
-    private void RefreshGrid()
-    {
-        int totalSlots = Rows * Columns;
-        
-        // Önce profildeki item sayısını ayarla
-        while (_currentProfile.Items.Count < totalSlots)
+        if (result == MessageBoxResult.Yes)
         {
-            int i = _currentProfile.Items.Count;
-            _currentProfile.Items.Add(new DeckItem
-            {
-                Title = "Boş",
-                Color = "#222222",
-                Row = i / Columns,
-                Column = i % Columns
-            });
-        }
-        
-        // Fazla itemleri kaldır
-        while (_currentProfile.Items.Count > totalSlots)
-        {
-            _currentProfile.Items.RemoveAt(_currentProfile.Items.Count - 1);
-        }
-        
-        // Her elemanın satır/sütun bilgisini güncelle
-        for (int i = 0; i < totalSlots; i++)
-        {
-            var item = _currentProfile.Items[i];
-            item.Row = i / Columns;
-            item.Column = i % Columns;
-        }
-        
-        // DeckItems koleksiyonunu yeniden oluştur
-        DeckItems.Clear();
-        foreach (var item in _currentProfile.Items)
-        {
-            DeckItems.Add(item);
-        }
-        
-        // UI'ın güncellenmesini zorla
-        OnPropertyChanged(nameof(DeckItems));
-        OnPropertyChanged(nameof(Rows));
-        OnPropertyChanged(nameof(Columns));
-    }
-
-
-    private void OnItemClick(object? parameter)
-    {
-        if (parameter is DeckItem item)
-        {
-            if (IsEditorOpen) // Editör açıksa SEÇ (Toggle durumu değişmez!)
-            {
-                SelectedDeckItem = item;
-            }
-            else // Kapalıysa ÇALIŞTIR
-            {
-                // Toggle buton ise durumu değiştir
-                if (item.BehaviorType == "Toggle")
-                {
-                    item.IsActive = !item.IsActive;
-                }
-                
-                // Aksiyonu çalıştır
-                _actionService.ExecuteItem(item);
-            }
-        }
-    }
-
-    private void OpenEditor()
-    {
-        // Eğer zaten açıksa öne getir
-        if (_editorWindow != null)
-        {
-            _editorWindow.Activate();
-            return;
-        }
-
-        try
-        {
-            // Widget penceresini animasyonlı gizle (Modal mod)
-            if (_mainWindow != null)
-            {
-                // FadeOut animasyonu
-                var fadeOut = new System.Windows.Media.Animation.DoubleAnimation
-                {
-                    From = 1.0,
-                    To = 0.0,
-                    Duration = TimeSpan.FromMilliseconds(200)
-                };
-                fadeOut.Completed += (s, e) => _mainWindow.Hide();
-                _mainWindow.BeginAnimation(Window.OpacityProperty, fadeOut);
-            }
-
-            // DI ile EditorWindow ve EditorViewModel oluştur
-            _editorWindow = _editorWindowFactory();
-            var editorViewModel = _editorViewModelFactory();
-            
-            // EditorViewModel'e window referansını ver
-            editorViewModel.SetWindow(_editorWindow);
-            _editorWindow.DataContext = editorViewModel;
-            
-            // Pencere sahipliğini ayarla (Taskbar/Alt-Tab davranışı için kritik)
-            _editorWindow.Owner = _mainWindow;
-            
-            // Pencere kapanınca referansı temizle ve Widget'ı göster
-            _editorWindow.Closed += (s, e) => OnEditorClosed();
-
-            _editorWindow.Show();
-            OnPropertyChanged(nameof(IsEditorOpen));
-        }
-        catch (Exception ex)
-        {
-            // Editör açılamazsa Widget'ı tekrar göster (Risk Önlemi)
-            if (_mainWindow != null)
-            {
-                _mainWindow.Opacity = 1.0;
-                _mainWindow.Show();
-            }
-            
-            MessageBox.Show($"Editör açılırken hata oluştu: {ex.Message}", 
-                "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
-    /// <summary>
-    /// Called by EditorViewModel when editor window closes
-    /// </summary>
-    public void OnEditorClosed()
-    {
-        _editorWindow = null;
-        SelectedDeckItem = null;
-        OnPropertyChanged(nameof(IsEditorOpen));
-        
-        // Widget'ı animasyonlı göster (Modal mod sonu)
-        if (_mainWindow != null)
-        {
-            _mainWindow.Opacity = 0.0;
-            _mainWindow.Show();
-            _mainWindow.Activate();
-            
-            // FadeIn animasyonu
-            var fadeIn = new System.Windows.Media.Animation.DoubleAnimation
-            {
-                From = 0.0,
-                To = 1.0,
-                Duration = TimeSpan.FromMilliseconds(300)
-            };
-            _mainWindow.BeginAnimation(Window.OpacityProperty, fadeIn);
+            _profileService.DeleteCurrentProfile();
         }
     }
     
     /// <summary>
-    /// MainWindow referansını ayarla (Constructor'dan çağrılır)
+    /// Sets the main window reference for modal behavior.
     /// </summary>
     public void SetMainWindow(Window mainWindow)
     {
-        _mainWindow = mainWindow;
+        _editorWindowService.SetMainWindow(mainWindow);
     }
     
     /// <summary>
-    /// Layout'u zorla yenile - ilk açılışta boşluk sorunu için
+    /// Forces layout refresh - for initial load spacing issues.
     /// </summary>
     public void ForceLayoutRefresh()
     {
@@ -527,15 +307,14 @@ public class MainViewModel : ObservableObject
 
     public void SaveChanges()
     {
-        _currentProfile.Items = DeckItems.ToList();
-        _configService.SaveProfile(_currentProfile);
+        _profileService.CurrentProfile.Items = DeckItems.ToList();
+        _profileService.SaveCurrentProfile();
     }
     
     public void SaveAndCloseEditor()
     {
         SaveChanges();
-        // Editör penceresini kapat
-        _editorWindow?.Close();
+        _editorWindowService.CloseEditor();
     }
 
     public void HandleFileDrop(DeckItem targetItem, string filePath)
@@ -543,43 +322,36 @@ public class MainViewModel : ObservableObject
         string ext = System.IO.Path.GetExtension(filePath).ToLower();
         string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
 
-        // 1. E�er resim dosas�ysa
+        // 1. If image file
         if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".ico")
         {
             targetItem.IconPath = filePath;
-            targetItem.Title = ""; // İsteğe bağlı: Resim atınca yazıyı silebilirsiniz
+            targetItem.Title = "";
             if (IsEditorOpen) SelectedDeckItem = targetItem;
             return; 
         }
 
-        // 2. E�er EXE veya Kısayol ise (G�NCELLEND�)
+        // 2. If EXE or shortcut
         if (ext == ".exe" || ext == ".lnk" || ext == ".bat")
         {
             targetItem.Title = fileName;
             targetItem.Command = filePath;
             targetItem.ActionType = "Execute";
 
-            // --- �KON �IKARMA ��LEM� ---
-            
-            // �konlar�n kaydedilece�i klas�r: %AppData%/StreamDeckWidgetApp/CachedIcons
+            // Extract icon
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string iconsFolder = System.IO.Path.Combine(appData, "StreamDeckWidgetApp", "CachedIcons");
-
-            // Helper s�n�f�n� �a��r
             string? newIconPath = IconHelper.ExtractAndSaveIcon(filePath, iconsFolder);
 
             if (!string.IsNullOrEmpty(newIconPath))
             {
-                targetItem.IconPath = newIconPath; // Butonun resmi art�k EXE'nin ikonu!
+                targetItem.IconPath = newIconPath;
             }
-            
-            // ---------------------------
 
             if (IsEditorOpen) SelectedDeckItem = targetItem;
             
-            // Otomatik kaydet
-            _currentProfile.Items = DeckItems.ToList();
-            _configService.SaveProfile(_currentProfile);
+            // Auto-save
+            SaveChanges();
         }
     }
     
@@ -599,13 +371,11 @@ public class MainViewModel : ObservableObject
     {
         var allPresets = PresetService.GetAllPresets();
         
-        // Kategori filtresi
         if (SelectedCategory != "Tümü")
         {
             allPresets = allPresets.Where(p => p.Category == SelectedCategory).ToList();
         }
         
-        // Arama filtresi
         if (!string.IsNullOrWhiteSpace(LibrarySearchText))
         {
             allPresets = PresetService.SearchPresets(LibrarySearchText);
@@ -623,7 +393,7 @@ public class MainViewModel : ObservableObject
     }
     
     /// <summary>
-    /// Preset'i seçili butona uygula
+    /// Applies a preset to the selected deck item.
     /// </summary>
     public void ApplyPresetToSelectedItem(PresetModel preset)
     {
