@@ -124,6 +124,24 @@
                                                                Opacity="0.95">
 
                                                     </TextBlock>
+
+                                                    <!-- Boş slot için + ikonu -->
+                                                    <TextBlock Text="+" FontSize="32" Foreground="#4CC2FF"  HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Light" Opacity="0.6">
+                                                        <TextBlock.Effect>
+                                                            <DropShadowEffect ShadowDepth="0" BlurRadius="12" Opacity="0.5" Color="#4CC2FF"/>
+                                                        </TextBlock.Effect>
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Title}" Value="Boş">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    
                                                 </Grid>
                                             </Border>
 

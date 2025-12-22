@@ -17,7 +17,7 @@ public class MainViewModel : ObservableObject
     private readonly IEditorWindowService _editorWindowService;
 
     // --- State Properties ---
-    
+
     private DeckItem? _selectedDeckItem;
     public DeckItem? SelectedDeckItem
     {
@@ -27,15 +27,15 @@ public class MainViewModel : ObservableObject
             // Clear previous selection
             if (_selectedDeckItem != null)
                 _selectedDeckItem.IsSelected = false;
-            
+
             SetField(ref _selectedDeckItem, value);
-            
+
             // Mark new selection
             if (_selectedDeckItem != null)
                 _selectedDeckItem.IsSelected = true;
         }
     }
-    
+
     // Grid Dimensions - Dynamically changeable
     public int Rows
     {
@@ -66,7 +66,7 @@ public class MainViewModel : ObservableObject
             }
         }
     }
-    
+
     // Button size options (Display Name -> Pixel Size)
     public Dictionary<string, int> ButtonSizeOptions { get; } = new()
     {
@@ -89,8 +89,8 @@ public class MainViewModel : ObservableObject
     }
 
     // Action types for ComboBox
-    public List<string> ActionTypes { get; } = new() 
-    { 
+    public List<string> ActionTypes { get; } = new()
+    {
         "Execute",
         "Hotkey",
         "Website",
@@ -104,7 +104,7 @@ public class MainViewModel : ObservableObject
 
     // Editor open state - proxied from EditorWindowService
     public bool IsEditorOpen => _editorWindowService.IsEditorOpen;
-    
+
     // --- Preset Library ---
     private ObservableCollection<PresetModel> _libraryItems;
     public ObservableCollection<PresetModel> LibraryItems
@@ -112,7 +112,7 @@ public class MainViewModel : ObservableObject
         get => _libraryItems;
         set => SetField(ref _libraryItems, value);
     }
-    
+
     private string _librarySearchText = string.Empty;
     public string LibrarySearchText
     {
@@ -125,7 +125,7 @@ public class MainViewModel : ObservableObject
             }
         }
     }
-    
+
     private string _selectedCategory = "Tümü";
     public string SelectedCategory
     {
@@ -138,13 +138,13 @@ public class MainViewModel : ObservableObject
             }
         }
     }
-    
+
     public List<string> LibraryCategories { get; } = new() { "Tümü" };
 
     // --- Profile Properties (proxied from ProfileService) ---
     public IReadOnlyList<Profile> Profiles => _profileService.Profiles;
     public Profile CurrentProfile => _profileService.CurrentProfile;
-    
+
     public string CurrentProfileName
     {
         get => _profileService.CurrentProfile?.Name ?? "Profil";
@@ -169,7 +169,7 @@ public class MainViewModel : ObservableObject
     public ICommand DuplicateProfileCommand { get; }
 
     public MainViewModel(
-        IActionService actionService, 
+        IActionService actionService,
         IProfileService profileService,
         IGridService gridService,
         IEditorWindowService editorWindowService)
@@ -179,40 +179,40 @@ public class MainViewModel : ObservableObject
         _gridService = gridService;
         _editorWindowService = editorWindowService;
         _libraryItems = new ObservableCollection<PresetModel>();
-        
+
         // Load library categories
         LibraryCategories.AddRange(PresetService.GetCategories());
-        
+
         // Subscribe to service events
         _profileService.ProfileChanged += OnProfileChanged;
         _gridService.GridRefreshed += OnGridRefreshed;
         _editorWindowService.EditorClosed += OnEditorClosed;
-        
+
         // Initial grid refresh
         _gridService.RefreshGrid(_profileService.CurrentProfile);
 
         // Commands
         ItemClickCommand = new RelayCommand(OnItemClick);
-        CloseAppCommand = new RelayCommand(_ => 
+        CloseAppCommand = new RelayCommand(_ =>
         {
             SaveChanges();
             Application.Current.Shutdown();
         });
         OpenEditorCommand = new RelayCommand(_ => OpenEditor());
         SaveCommand = new RelayCommand(_ => SaveChanges());
-        
+
         // Profile commands
         SwitchProfileCommand = new RelayCommand(profileId => _profileService.SwitchProfile(profileId as string ?? ""));
         CreateProfileCommand = new RelayCommand(_ => _profileService.CreateProfile($"Profil {Profiles.Count + 1}"));
         DeleteProfileCommand = new RelayCommand(_ => DeleteCurrentProfile());
         DuplicateProfileCommand = new RelayCommand(_ => _profileService.DuplicateCurrentProfile($"{CurrentProfile.Name} (Kopya)"));
-        
+
         // Load library
         LoadLibrary();
     }
 
     // --- Event Handlers ---
-    
+
     private void OnProfileChanged()
     {
         // Refresh UI when profile changes
@@ -222,17 +222,17 @@ public class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentProfileName));
         OnPropertyChanged(nameof(CurrentProfile));
         OnPropertyChanged(nameof(Profiles));
-        
+
         _gridService.RefreshGrid(_profileService.CurrentProfile);
     }
-    
+
     private void OnGridRefreshed()
     {
         OnPropertyChanged(nameof(DeckItems));
         OnPropertyChanged(nameof(Rows));
         OnPropertyChanged(nameof(Columns));
     }
-    
+
     private void OnEditorClosed()
     {
         SelectedDeckItem = null;
@@ -240,7 +240,7 @@ public class MainViewModel : ObservableObject
     }
 
     // --- Private Methods ---
-    
+
     private void OnItemClick(object? parameter)
     {
         if (parameter is DeckItem item)
@@ -248,15 +248,21 @@ public class MainViewModel : ObservableObject
             if (IsEditorOpen)
             {
                 SelectedDeckItem = item;
+                return;
             }
-            else
+
+            if (string.IsNullOrEmpty(item.Command))
             {
-                if (item.BehaviorType == "Toggle")
-                {
-                    item.IsActive = !item.IsActive;
-                }
-                _actionService.ExecuteItem(item);
+                OpenEditor();
             }
+            
+
+            if (item.BehaviorType == "Toggle")
+            {
+                item.IsActive = !item.IsActive;
+            }
+            _actionService.ExecuteItem(item);
+
         }
     }
 
@@ -265,7 +271,7 @@ public class MainViewModel : ObservableObject
         _editorWindowService.OpenEditor();
         OnPropertyChanged(nameof(IsEditorOpen));
     }
-    
+
     private void DeleteCurrentProfile()
     {
         if (Profiles.Count <= 1)
@@ -273,19 +279,19 @@ public class MainViewModel : ObservableObject
             MessageBox.Show("En az bir profil olmalı!", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-        
+
         var result = MessageBox.Show(
             $"\"{CurrentProfile.Name}\" profili silinecek. Emin misiniz?",
             "Profil Sil",
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
-        
+
         if (result == MessageBoxResult.Yes)
         {
             _profileService.DeleteCurrentProfile();
         }
     }
-    
+
     /// <summary>
     /// Sets the main window reference for modal behavior.
     /// </summary>
@@ -293,7 +299,7 @@ public class MainViewModel : ObservableObject
     {
         _editorWindowService.SetMainWindow(mainWindow);
     }
-    
+
     /// <summary>
     /// Forces layout refresh - for initial load spacing issues.
     /// </summary>
@@ -310,7 +316,7 @@ public class MainViewModel : ObservableObject
         _profileService.CurrentProfile.Items = DeckItems.ToList();
         _profileService.SaveCurrentProfile();
     }
-    
+
     public void SaveAndCloseEditor()
     {
         SaveChanges();
@@ -328,7 +334,7 @@ public class MainViewModel : ObservableObject
             targetItem.IconPath = filePath;
             targetItem.Title = "";
             if (IsEditorOpen) SelectedDeckItem = targetItem;
-            return; 
+            return;
         }
 
         // 2. If EXE or shortcut
@@ -349,14 +355,14 @@ public class MainViewModel : ObservableObject
             }
 
             if (IsEditorOpen) SelectedDeckItem = targetItem;
-            
+
             // Auto-save
             SaveChanges();
         }
     }
-    
+
     // --- Preset Library Methods ---
-    
+
     private void LoadLibrary()
     {
         var allPresets = PresetService.GetAllPresets();
@@ -366,16 +372,16 @@ public class MainViewModel : ObservableObject
             LibraryItems.Add(preset);
         }
     }
-    
+
     private void FilterLibrary()
     {
         var allPresets = PresetService.GetAllPresets();
-        
+
         if (SelectedCategory != "Tümü")
         {
             allPresets = allPresets.Where(p => p.Category == SelectedCategory).ToList();
         }
-        
+
         if (!string.IsNullOrWhiteSpace(LibrarySearchText))
         {
             allPresets = PresetService.SearchPresets(LibrarySearchText);
@@ -384,21 +390,21 @@ public class MainViewModel : ObservableObject
                 allPresets = allPresets.Where(p => p.Category == SelectedCategory).ToList();
             }
         }
-        
+
         LibraryItems.Clear();
         foreach (var preset in allPresets)
         {
             LibraryItems.Add(preset);
         }
     }
-    
+
     /// <summary>
     /// Applies a preset to the selected deck item.
     /// </summary>
     public void ApplyPresetToSelectedItem(PresetModel preset)
     {
         if (SelectedDeckItem == null) return;
-        
+
         var deckItem = preset.ToDeckItem();
         SelectedDeckItem.Title = deckItem.Title;
         SelectedDeckItem.ActionType = deckItem.ActionType;
