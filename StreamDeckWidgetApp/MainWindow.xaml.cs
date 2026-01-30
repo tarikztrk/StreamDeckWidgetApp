@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using Wpf.Ui.Controls;
+using StreamDeckWidgetApp.Abstractions;
 using StreamDeckWidgetApp.Models;
 using StreamDeckWidgetApp.ViewModels;
 
@@ -8,11 +9,14 @@ namespace StreamDeckWidgetApp;
 
 public partial class MainWindow : FluentWindow
 {
-    // Dependency Injection ile ViewModel'i aliyoruz
-    public MainWindow(MainViewModel viewModel)
+    private readonly IWindowSizingService _windowSizingService;
+
+    // Dependency Injection ile ViewModel ve servisler
+    public MainWindow(MainViewModel viewModel, IWindowSizingService windowSizingService)
     {
         InitializeComponent();
-        DataContext = viewModel; // DataBinding baglantisi
+        DataContext = viewModel;
+        _windowSizingService = windowSizingService;
         
         // ViewModel'e MainWindow referansını ver (Modal mod için)
         viewModel.SetMainWindow(this);
@@ -48,18 +52,11 @@ public partial class MainWindow : FluentWindow
     
     private void UpdateWindowSize(MainViewModel vm)
     {
-        const double titleBarHeight = 32;
-        const double gridMargin = 2;
-        const double buttonMargin = 2;
-        
-        double width = (vm.SelectedButtonSize * vm.Columns) + 
-                       (buttonMargin * vm.Columns * 2) + 
-                       (gridMargin * 2);
-                       
-        double height = (vm.SelectedButtonSize * vm.Rows) + 
-                        (buttonMargin * vm.Rows * 2) + 
-                        titleBarHeight + 
-                        (gridMargin * 2);
+        // Delegate sizing calculation to WindowSizingService (SRP)
+        var (width, height) = _windowSizingService.CalculateWindowSize(
+            vm.Rows,
+            vm.Columns,
+            vm.SelectedButtonSize);
         
         // Min = Max yaparak resize'ı engelle
         MinWidth = MaxWidth = Width = width;

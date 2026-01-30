@@ -105,7 +105,7 @@ public class EditorViewModel : ObservableObject
         set => _mainViewModel.SelectedCategory = value;
     }
     
-    public List<string> LibraryCategories => _mainViewModel.LibraryCategories;
+    public IReadOnlyList<string> LibraryCategories => _mainViewModel.LibraryCategories;
     
     // ================================================================
     // ACTION-SPECIFIC COMMAND OPTIONS

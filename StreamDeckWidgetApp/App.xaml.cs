@@ -18,18 +18,25 @@ public partial class App : Application
         _host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                // Servis Katmanı Kayıtları
+                // Core Services
                 services.AddSingleton<IActionService, ActionService>();
                 services.AddSingleton<IConfigService, JsonConfigService>();
                 services.AddSingleton<IProfileService, ProfileService>();
                 services.AddSingleton<IGridService, GridService>();
                 services.AddSingleton<IEditorWindowService, EditorWindowService>();
 
-                // ViewModel'leri Kayıt Et
+                // Refactored Services (SRP Compliance)
+                services.AddSingleton<IDialogService, DialogService>();
+                services.AddSingleton<ISelectionManager, SelectionManager>();
+                services.AddSingleton<IFileDropHandler, FileDropHandler>();
+                services.AddSingleton<IWindowSizingService, WindowSizingService>();
+
+                // ViewModels
                 services.AddSingleton<MainViewModel>();
                 services.AddTransient<EditorViewModel>();
+                services.AddSingleton<ILibraryViewModel, LibraryViewModel>();
 
-                // View'ları Kayıt Et
+                // Views
                 services.AddTransient<MainWindow>();
                 services.AddTransient<EditorWindow>();
 

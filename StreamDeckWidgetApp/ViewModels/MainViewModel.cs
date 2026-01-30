@@ -3,37 +3,34 @@ using System.Windows;
 using System.Windows.Input;
 using StreamDeckWidgetApp.Abstractions;
 using StreamDeckWidgetApp.Core;
-using StreamDeckWidgetApp.Core.Helpers;
 using StreamDeckWidgetApp.Models;
-using StreamDeckWidgetApp.Services;
 
 namespace StreamDeckWidgetApp.ViewModels;
 
+/// <summary>
+/// Main ViewModel - refactored to follow Single Responsibility Principle.
+/// Now delegates specialized concerns to dedicated services and ViewModels.
+/// </summary>
 public class MainViewModel : ObservableObject
 {
     private readonly IActionService _actionService;
     private readonly IProfileService _profileService;
     private readonly IGridService _gridService;
     private readonly IEditorWindowService _editorWindowService;
+    private readonly ISelectionManager _selectionManager;
+    private readonly IFileDropHandler _fileDropHandler;
+    private readonly IDialogService _dialogService;
+    private readonly ILibraryViewModel _libraryViewModel;
 
     // --- State Properties ---
 
-    private DeckItem? _selectedDeckItem;
+    /// <summary>
+    /// Gets the currently selected deck item (proxied from SelectionManager).
+    /// </summary>
     public DeckItem? SelectedDeckItem
     {
-        get => _selectedDeckItem;
-        set
-        {
-            // Clear previous selection
-            if (_selectedDeckItem != null)
-                _selectedDeckItem.IsSelected = false;
-
-            SetField(ref _selectedDeckItem, value);
-
-            // Mark new selection
-            if (_selectedDeckItem != null)
-                _selectedDeckItem.IsSelected = true;
-        }
+        get => _selectionManager.SelectedItem;
+        set => _selectionManager.SelectItem(value);
     }
 
     // Grid size changed event - notifies MainWindow to update dimensions
@@ -111,41 +108,26 @@ public class MainViewModel : ObservableObject
     // Editor open state - proxied from EditorWindowService
     public bool IsEditorOpen => _editorWindowService.IsEditorOpen;
 
-    // --- Preset Library ---
-    private ObservableCollection<PresetModel> _libraryItems;
-    public ObservableCollection<PresetModel> LibraryItems
-    {
-        get => _libraryItems;
-        set => SetField(ref _libraryItems, value);
-    }
+    // --- Preset Library (Delegated to LibraryViewModel) ---
+    
+    /// <summary>
+    /// Gets the library ViewModel that manages preset library functionality.
+    /// </summary>
+    public ILibraryViewModel LibraryViewModel => _libraryViewModel;
 
-    private string _librarySearchText = string.Empty;
+    // Proxy properties for XAML binding compatibility
+    public ObservableCollection<PresetModel> LibraryItems => _libraryViewModel.LibraryItems;
     public string LibrarySearchText
     {
-        get => _librarySearchText;
-        set
-        {
-            if (SetField(ref _librarySearchText, value))
-            {
-                FilterLibrary();
-            }
-        }
+        get => _libraryViewModel.SearchText;
+        set => _libraryViewModel.SearchText = value;
     }
-
-    private string _selectedCategory = "Tümü";
     public string SelectedCategory
     {
-        get => _selectedCategory;
-        set
-        {
-            if (SetField(ref _selectedCategory, value))
-            {
-                FilterLibrary();
-            }
-        }
+        get => _libraryViewModel.SelectedCategory;
+        set => _libraryViewModel.SelectedCategory = value;
     }
-
-    public List<string> LibraryCategories { get; } = new() { "Tümü" };
+    public IReadOnlyList<string> LibraryCategories => _libraryViewModel.Categories;
 
     // --- Profile Properties (proxied from ProfileService) ---
     public IReadOnlyList<Profile> Profiles => _profileService.Profiles;
@@ -178,21 +160,36 @@ public class MainViewModel : ObservableObject
         IActionService actionService,
         IProfileService profileService,
         IGridService gridService,
-        IEditorWindowService editorWindowService)
+        IEditorWindowService editorWindowService,
+        ISelectionManager selectionManager,
+        IFileDropHandler fileDropHandler,
+        IDialogService dialogService,
+        ILibraryViewModel libraryViewModel)
     {
         _actionService = actionService;
         _profileService = profileService;
         _gridService = gridService;
         _editorWindowService = editorWindowService;
-        _libraryItems = new ObservableCollection<PresetModel>();
-
-        // Load library categories
-        LibraryCategories.AddRange(PresetService.GetCategories());
+        _selectionManager = selectionManager;
+        _fileDropHandler = fileDropHandler;
+        _dialogService = dialogService;
+        _libraryViewModel = libraryViewModel;
 
         // Subscribe to service events
         _profileService.ProfileChanged += OnProfileChanged;
         _gridService.GridRefreshed += OnGridRefreshed;
         _editorWindowService.EditorClosed += OnEditorClosed;
+        _selectionManager.SelectionChanged += OnSelectionChanged;
+        _libraryViewModel.PropertyChanged += (s, e) =>
+        {
+            // Forward library property changes
+            if (e.PropertyName == nameof(ILibraryViewModel.LibraryItems))
+                OnPropertyChanged(nameof(LibraryItems));
+            else if (e.PropertyName == nameof(ILibraryViewModel.SearchText))
+                OnPropertyChanged(nameof(LibrarySearchText));
+            else if (e.PropertyName == nameof(ILibraryViewModel.SelectedCategory))
+                OnPropertyChanged(nameof(SelectedCategory));
+        };
 
         // Initial grid refresh
         _gridService.RefreshGrid(_profileService.CurrentProfile);
@@ -212,9 +209,6 @@ public class MainViewModel : ObservableObject
         CreateProfileCommand = new RelayCommand(_ => _profileService.CreateProfile($"Profil {Profiles.Count + 1}"));
         DeleteProfileCommand = new RelayCommand(_ => DeleteCurrentProfile());
         DuplicateProfileCommand = new RelayCommand(_ => _profileService.DuplicateCurrentProfile($"{CurrentProfile.Name} (Kopya)"));
-
-        // Load library
-        LoadLibrary();
     }
 
     // --- Event Handlers ---
@@ -241,8 +235,13 @@ public class MainViewModel : ObservableObject
 
     private void OnEditorClosed()
     {
-        SelectedDeckItem = null;
+        _selectionManager.ClearSelection();
         OnPropertyChanged(nameof(IsEditorOpen));
+    }
+
+    private void OnSelectionChanged(DeckItem? item)
+    {
+        OnPropertyChanged(nameof(SelectedDeckItem));
     }
 
     // --- Private Methods ---
@@ -282,17 +281,15 @@ public class MainViewModel : ObservableObject
     {
         if (Profiles.Count <= 1)
         {
-            MessageBox.Show("En az bir profil olmalı!", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _dialogService.ShowWarning("En az bir profil olmalı!", "Uyarı");
             return;
         }
 
-        var result = MessageBox.Show(
+        bool confirmed = _dialogService.ShowConfirmation(
             $"\"{CurrentProfile.Name}\" profili silinecek. Emin misiniz?",
-            "Profil Sil",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
+            "Profil Sil");
 
-        if (result == MessageBoxResult.Yes)
+        if (confirmed)
         {
             _profileService.DeleteCurrentProfile();
         }
@@ -331,91 +328,27 @@ public class MainViewModel : ObservableObject
 
     public void HandleFileDrop(DeckItem targetItem, string filePath)
     {
-        string ext = System.IO.Path.GetExtension(filePath).ToLower();
-        string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
-
-        // 1. If image file
-        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".ico")
+        bool success = _fileDropHandler.HandleFileDrop(targetItem, filePath);
+        
+        if (success)
         {
-            targetItem.IconPath = filePath;
-            targetItem.Title = "";
-            if (IsEditorOpen) SelectedDeckItem = targetItem;
-            return;
-        }
-
-        // 2. If EXE or shortcut
-        if (ext == ".exe" || ext == ".lnk" || ext == ".bat")
-        {
-            targetItem.Title = fileName;
-            targetItem.Command = filePath;
-            targetItem.ActionType = "Execute";
-
-            // Extract icon
-            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string iconsFolder = System.IO.Path.Combine(appData, "StreamDeckWidgetApp", "CachedIcons");
-            string? newIconPath = IconHelper.ExtractAndSaveIcon(filePath, iconsFolder);
-
-            if (!string.IsNullOrEmpty(newIconPath))
+            // Update selection if editor is open
+            if (IsEditorOpen)
             {
-                targetItem.IconPath = newIconPath;
+                SelectedDeckItem = targetItem;
             }
 
-            if (IsEditorOpen) SelectedDeckItem = targetItem;
-
-            // Auto-save
+            // Auto-save after successful drop
             SaveChanges();
         }
     }
 
-    // --- Preset Library Methods ---
-
-    private void LoadLibrary()
-    {
-        var allPresets = PresetService.GetAllPresets();
-        LibraryItems.Clear();
-        foreach (var preset in allPresets)
-        {
-            LibraryItems.Add(preset);
-        }
-    }
-
-    private void FilterLibrary()
-    {
-        var allPresets = PresetService.GetAllPresets();
-
-        if (SelectedCategory != "Tümü")
-        {
-            allPresets = allPresets.Where(p => p.Category == SelectedCategory).ToList();
-        }
-
-        if (!string.IsNullOrWhiteSpace(LibrarySearchText))
-        {
-            allPresets = PresetService.SearchPresets(LibrarySearchText);
-            if (SelectedCategory != "Tümü")
-            {
-                allPresets = allPresets.Where(p => p.Category == SelectedCategory).ToList();
-            }
-        }
-
-        LibraryItems.Clear();
-        foreach (var preset in allPresets)
-        {
-            LibraryItems.Add(preset);
-        }
-    }
-
     /// <summary>
-    /// Applies a preset to the selected deck item.
+    /// Applies a preset to the selected deck item (delegates to LibraryViewModel).
     /// </summary>
     public void ApplyPresetToSelectedItem(PresetModel preset)
     {
         if (SelectedDeckItem == null) return;
-
-        var deckItem = preset.ToDeckItem();
-        SelectedDeckItem.Title = deckItem.Title;
-        SelectedDeckItem.ActionType = deckItem.ActionType;
-        SelectedDeckItem.Command = deckItem.Command;
-        SelectedDeckItem.Color = deckItem.Color;
-        SelectedDeckItem.BehaviorType = deckItem.BehaviorType;
+        _libraryViewModel.ApplyPreset(preset, SelectedDeckItem);
     }
 }
