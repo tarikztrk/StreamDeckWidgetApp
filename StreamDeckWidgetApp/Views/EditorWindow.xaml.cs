@@ -10,6 +10,7 @@ public partial class EditorWindow : FluentWindow
 {
     private Point _dragStartPoint;
     private bool _isDragging = false;
+    private DeckItem? _draggedItem;
 
     public EditorWindow(EditorViewModel viewModel)
     {
@@ -45,6 +46,72 @@ public partial class EditorWindow : FluentWindow
         this.Focus();
     }
 
+    /// <summary>
+    /// Preview grid button mouse down handler
+    /// </summary>
+    private void PreviewGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _dragStartPoint = e.GetPosition(null);
+        _isDragging = false;
+        
+        if (sender is System.Windows.FrameworkElement element && element.DataContext is DeckItem item)
+        {
+            _draggedItem = item;
+        }
+    }
+    
+    /// <summary>
+    /// Preview grid button mouse up handler - Handle click if not dragging
+    /// </summary>
+    private void PreviewGrid_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isDragging && _draggedItem != null)
+        {
+            Point currentPosition = e.GetPosition(null);
+            Vector diff = _dragStartPoint - currentPosition;
+            
+            // If mouse didn't move much, treat it as a click
+            if (Math.Abs(diff.X) <= 5 && Math.Abs(diff.Y) <= 5)
+            {
+                // Execute the click command
+                if (DataContext is EditorViewModel vm)
+                {
+                    vm.ItemClickCommand.Execute(_draggedItem);
+                }
+            }
+        }
+        
+        _draggedItem = null;
+        _isDragging = false;
+    }
+    
+    /// <summary>
+    /// Preview grid button mouse move handler - Initiate drag after minimum distance
+    /// </summary>
+    private void PreviewGrid_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed && _draggedItem != null && !_isDragging)
+        {
+            Point currentPosition = e.GetPosition(null);
+            Vector diff = _dragStartPoint - currentPosition;
+            
+            // Minimum drag distance threshold (5 pixels)
+            if (Math.Abs(diff.X) > 5 || Math.Abs(diff.Y) > 5)
+            {
+                _isDragging = true;
+                
+                // Create drag data
+                DataObject dragData = new DataObject("StreamDeckButton", _draggedItem);
+                
+                // Start drag operation
+                DragDrop.DoDragDrop(sender as DependencyObject, dragData, DragDropEffects.Move);
+                
+                _isDragging = false;
+                _draggedItem = null;
+            }
+        }
+    }
+    
     /// <summary>
     /// Kütüphane listesinden preset sürükleme başlangıcı
     /// </summary>
@@ -95,8 +162,33 @@ public partial class EditorWindow : FluentWindow
         if (sender is not System.Windows.FrameworkElement element) return;
         if (element.DataContext is not DeckItem targetItem) return;
 
-        // 1. Preset sürükleme
-        if (e.Data.GetDataPresent("StreamDeckPreset"))
+        // 1. Buton reorder kontrolü (StreamDeckButton format)
+        if (e.Data.GetDataPresent("StreamDeckButton"))
+        {
+            if (e.Data.GetData("StreamDeckButton") is DeckItem sourceItem)
+            {
+                // Find indices of source and target items
+                var gridService = vm.DeckItems;
+                int fromIndex = -1, toIndex = -1;
+                
+                for (int i = 0; i < gridService.Count; i++)
+                {
+                    if (gridService[i] == sourceItem) fromIndex = i;
+                    if (gridService[i] == targetItem) toIndex = i;
+                }
+                
+                if (fromIndex >= 0 && toIndex >= 0 && fromIndex != toIndex)
+                {
+                    // Call ViewModel to swap items
+                    vm.SwapDeckItems(fromIndex, toIndex);
+                    
+                    // Save changes
+                    vm.SaveChanges();
+                }
+            }
+        }
+        // 2. Preset sürükleme
+        else if (e.Data.GetDataPresent("StreamDeckPreset"))
         {
             if (e.Data.GetData("StreamDeckPreset") is PresetModel preset)
             {
@@ -113,7 +205,6 @@ public partial class EditorWindow : FluentWindow
                 vm.SelectedDeckItem = targetItem;
             }
         }
-        // 2. İleride: Buton swap mantığı buraya eklenecek
     }
 
     /// <summary>
@@ -121,9 +212,11 @@ public partial class EditorWindow : FluentWindow
     /// </summary>
     private void PreviewGrid_DragOver(object sender, DragEventArgs e)
     {
-        if (e.Data.GetDataPresent("StreamDeckPreset"))
+        if (e.Data.GetDataPresent("StreamDeckButton") || 
+            e.Data.GetDataPresent("StreamDeckPreset"))
         {
-            e.Effects = DragDropEffects.Copy;
+            e.Effects = e.Data.GetDataPresent("StreamDeckButton") ? 
+                       DragDropEffects.Move : DragDropEffects.Copy;
         }
         else
         {

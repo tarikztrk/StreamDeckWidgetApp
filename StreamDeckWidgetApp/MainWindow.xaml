@@ -64,12 +64,16 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Button Command="{Binding DataContext.ItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                            CommandParameter="{Binding}"
-                            Margin="1"
+                    <Button Margin="1"
                             Cursor="Hand"
                             BorderThickness="0"
                             ToolTip="{Binding Title}"
+                            PreviewMouseLeftButtonDown="Button_PreviewMouseLeftButtonDown"
+                            PreviewMouseLeftButtonUp="Button_PreviewMouseLeftButtonUp"
+                            PreviewMouseMove="Button_PreviewMouseMove"
+                            AllowDrop="True"
+                            Drop="Button_Drop"
+                            DragOver="Button_DragOver"
                             Width="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
                             Height="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}">
                         <Button.Style>
@@ -81,8 +85,6 @@
                                                     Background="{Binding Color}"
                                                     CornerRadius="8"
                                                     Padding="5"
-                                                    AllowDrop="True"
-                                                    Drop="Button_Drop"
                                                     BorderThickness="3"
                                                     RenderTransformOrigin="0.5,0.5">
                                                 <Border.RenderTransform>

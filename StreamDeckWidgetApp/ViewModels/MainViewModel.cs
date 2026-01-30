@@ -351,4 +351,12 @@ public class MainViewModel : ObservableObject
         if (SelectedDeckItem == null) return;
         _libraryViewModel.ApplyPreset(preset, SelectedDeckItem);
     }
+    
+    /// <summary>
+    /// Swaps two deck items by their indices in the collection.
+    /// </summary>
+    public void SwapDeckItems(int fromIndex, int toIndex)
+    {
+        _gridService.SwapItems(fromIndex, toIndex);
+    }
 }

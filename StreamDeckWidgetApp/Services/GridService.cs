@@ -69,4 +69,42 @@ public class GridService : IGridService
     {
         return Math.Clamp(value, 1, MaxColumns);
     }
+    
+    public void SwapItems(int fromIndex, int toIndex)
+    {
+        if (fromIndex < 0 || fromIndex >= DeckItems.Count || 
+            toIndex < 0 || toIndex >= DeckItems.Count || 
+            fromIndex == toIndex)
+        {
+            return;
+        }
+        
+        // Calculate columns from first item's position
+        int columns = 1;
+        for (int i = 0; i < DeckItems.Count; i++)
+        {
+            if (DeckItems[i].Row == 1)
+            {
+                columns = i;
+                break;
+            }
+        }
+        
+        if (columns == 1 && DeckItems.Count > 1)
+        {
+            // Fallback: find max column value + 1
+            columns = DeckItems.Max(item => item.Column) + 1;
+        }
+        
+        // Swap items in the collection
+        var temp = DeckItems[fromIndex];
+        DeckItems[fromIndex] = DeckItems[toIndex];
+        DeckItems[toIndex] = temp;
+        
+        // Update Row and Column properties after swap
+        DeckItems[fromIndex].Row = fromIndex / columns;
+        DeckItems[fromIndex].Column = fromIndex % columns;
+        DeckItems[toIndex].Row = toIndex / columns;
+        DeckItems[toIndex].Column = toIndex % columns;
+    }
 }

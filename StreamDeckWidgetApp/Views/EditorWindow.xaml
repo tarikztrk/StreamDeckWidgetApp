@@ -272,11 +272,12 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Command="{Binding DataContext.ItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                            CommandParameter="{Binding}"
-                                            Margin="5" BorderThickness="0"
+                                    <Button Margin="5" BorderThickness="0"
                                             Width="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}" 
                                             Height="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            PreviewMouseLeftButtonDown="PreviewGrid_PreviewMouseLeftButtonDown"
+                                            PreviewMouseLeftButtonUp="PreviewGrid_PreviewMouseLeftButtonUp"
+                                            PreviewMouseMove="PreviewGrid_PreviewMouseMove"
                                             AllowDrop="True"
                                             Drop="PreviewGrid_Drop"
                                             DragOver="PreviewGrid_DragOver">

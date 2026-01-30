@@ -310,4 +310,20 @@ public class EditorViewModel : ObservableObject
     {
         _editorWindow?.Close();
     }
+    
+    /// <summary>
+    /// Swaps two deck items by their indices in the collection (delegates to MainViewModel).
+    /// </summary>
+    public void SwapDeckItems(int fromIndex, int toIndex)
+    {
+        _mainViewModel.SwapDeckItems(fromIndex, toIndex);
+    }
+    
+    /// <summary>
+    /// Save changes immediately (delegates to MainViewModel).
+    /// </summary>
+    public void SaveChanges()
+    {
+        _mainViewModel.SaveChanges();
+    }
 }

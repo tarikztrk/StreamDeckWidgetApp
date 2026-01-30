@@ -44,4 +44,10 @@ public interface IGridService
     /// Clamps the given column value to valid range.
     /// </summary>
     int ClampColumns(int value);
+    
+    /// <summary>
+    /// Swaps two items in the DeckItems collection by their indices.
+    /// Updates Row and Column properties after swap.
+    /// </summary>
+    void SwapItems(int fromIndex, int toIndex);
 }
