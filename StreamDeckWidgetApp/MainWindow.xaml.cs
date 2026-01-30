@@ -17,6 +17,12 @@ public partial class MainWindow : FluentWindow
         // ViewModel'e MainWindow referansını ver (Modal mod için)
         viewModel.SetMainWindow(this);
         
+        // İlk boyutu hemen hesapla
+        UpdateWindowSize(viewModel);
+        
+        // Grid değişikliğinde güncelle
+        viewModel.GridSizeChanged += () => UpdateWindowSize(viewModel);
+        
         // İlk yüklemede layout sorununu önlemek için
         Loaded += MainWindow_Loaded;
     }
@@ -34,8 +40,30 @@ public partial class MainWindow : FluentWindow
             if (DataContext is MainViewModel vm)
             {
                 vm.ForceLayoutRefresh();
+                // Layout sonrası tekrar boyut kontrol
+                UpdateWindowSize(vm);
             }
         }, System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+    
+    private void UpdateWindowSize(MainViewModel vm)
+    {
+        const double titleBarHeight = 32;
+        const double gridMargin = 2;
+        const double buttonMargin = 2;
+        
+        double width = (vm.SelectedButtonSize * vm.Columns) + 
+                       (buttonMargin * vm.Columns * 2) + 
+                       (gridMargin * 2);
+                       
+        double height = (vm.SelectedButtonSize * vm.Rows) + 
+                        (buttonMargin * vm.Rows * 2) + 
+                        titleBarHeight + 
+                        (gridMargin * 2);
+        
+        // Min = Max yaparak resize'ı engelle
+        MinWidth = MaxWidth = Width = width;
+        MinHeight = MaxHeight = Height = height;
     }
 
     // Drag & Drop Event Handler
@@ -90,6 +118,17 @@ public partial class MainWindow : FluentWindow
                 }
             }
         }
+    }
+    // Make the window topmost only while mouse is over it so desktop icons can be clicked
+    private void FluentWindow_MouseEnter(object sender, MouseEventArgs e)
+    {
+        this.Topmost = true;
+    }
+
+    private void FluentWindow_MouseLeave(object sender, MouseEventArgs e)
+    {
+        // Lower topmost so user can interact with desktop behind the widget
+        this.Topmost = false;
     }
 }
 

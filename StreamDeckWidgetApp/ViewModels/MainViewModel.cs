@@ -36,6 +36,9 @@ public class MainViewModel : ObservableObject
         }
     }
 
+    // Grid size changed event - notifies MainWindow to update dimensions
+    public event Action? GridSizeChanged;
+
     // Grid Dimensions - Dynamically changeable
     public int Rows
     {
@@ -48,6 +51,7 @@ public class MainViewModel : ObservableObject
                 _profileService.CurrentProfile.Rows = newVal;
                 OnPropertyChanged();
                 _gridService.RefreshGrid(_profileService.CurrentProfile);
+                GridSizeChanged?.Invoke();
             }
         }
     }
@@ -63,6 +67,7 @@ public class MainViewModel : ObservableObject
                 _profileService.CurrentProfile.Columns = newVal;
                 OnPropertyChanged();
                 _gridService.RefreshGrid(_profileService.CurrentProfile);
+                GridSizeChanged?.Invoke();
             }
         }
     }
@@ -84,6 +89,7 @@ public class MainViewModel : ObservableObject
             {
                 _profileService.CurrentProfile.ButtonSize = value;
                 OnPropertyChanged();
+                GridSizeChanged?.Invoke();
             }
         }
     }

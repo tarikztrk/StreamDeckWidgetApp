@@ -7,14 +7,10 @@
                  xmlns:converters="clr-namespace:StreamDeckWidgetApp.Core.Converters"
                  mc:Ignorable="d"
                  Title="Virtual Deck"
-                 SizeToContent="WidthAndHeight"
-                 ResizeMode="NoResize"
                  Topmost="True"
                  WindowCornerPreference="Round"
                  WindowBackdropType="Mica"
-                 ExtendsContentIntoTitleBar="True"
-                 MinHeight="100"
-                 MinWidth="100">
+                 ExtendsContentIntoTitleBar="True">
 
     <ui:FluentWindow.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -73,6 +69,7 @@
                             Margin="1"
                             Cursor="Hand"
                             BorderThickness="0"
+                            ToolTip="{Binding Title}"
                             Width="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}"
                             Height="{Binding DataContext.SelectedButtonSize, RelativeSource={RelativeSource AncestorType=Window}}">
                         <Button.Style>
